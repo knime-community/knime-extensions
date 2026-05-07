@@ -12,6 +12,11 @@ public class CellAddress {
 
     private CellAddress(final int startCol, final int startRow,
                         final int endCol, final int endRow, final boolean isRange) {
+        // Negative values indicate POI could not resolve a valid row or column
+        if (startCol < 0 || startRow < 0 || endCol < 0 || endRow < 0) {
+            throw new IllegalArgumentException(
+                "Invalid cell coordinates (row=" + startRow + ", col=" + startCol + ")");
+        }
         this.startCol = startCol;
         this.startRow = startRow;
         this.endCol = endCol;
@@ -36,6 +41,8 @@ public class CellAddress {
                 final int row = ref.getRow();
                 return new CellAddress(col, row, col, row, false);
             }
+        } catch (final IllegalArgumentException e) {
+            throw e;
         } catch (final RuntimeException e) {
             throw new IllegalArgumentException("Invalid cell address: '" + address + "'", e);
         }
