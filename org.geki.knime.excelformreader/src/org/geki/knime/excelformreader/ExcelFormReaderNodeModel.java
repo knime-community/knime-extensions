@@ -11,6 +11,7 @@ import org.geki.knime.excelformreader.domain.FormDefinition;
 import org.geki.knime.excelformreader.domain.ReadingMode;
 import org.geki.knime.excelformreader.excel.ExcelFormExtractor;
 import org.geki.knime.excelformreader.excel.WorkbookIterator;
+import org.geki.knime.excelformreader.output.LabelOutputBuilder;
 import org.geki.knime.excelformreader.output.LongOutputBuilder;
 import org.geki.knime.excelformreader.output.OutputSpecFactory;
 import org.geki.knime.excelformreader.output.WideOutputBuilder;
@@ -88,22 +89,23 @@ public class ExcelFormReaderNodeModel extends NodeModel {
 
         final FormDefinition definition = FormDefinition.fromSpec(inSpecs[0]);
 
-        final DataTableSpec spec;
+        final DataTableSpec port0Spec;
         if (m_settings.getOutputFormat() == OutputFormat.WIDE) {
-            spec = OutputSpecFactory.createWideSpec(definition,
+            port0Spec = OutputSpecFactory.createWideSpec(definition,
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName(),
-                false); // TODO L3: wire includeLabelFields from settings
+                m_settings.isIncludeLabelFields());
         } else {
-            spec = OutputSpecFactory.createLongSpec(
+            port0Spec = OutputSpecFactory.createLongSpec(
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName());
         }
 
-        // TODO L3: wire includeSourceFilename/includeSheetName from settings for label spec
-        final DataTableSpec labelSpec = OutputSpecFactory.createLabelSpec(false, false);
+        final DataTableSpec port1Spec = OutputSpecFactory.createLabelSpec(
+            m_settings.isIncludeSourceFilename(),
+            m_settings.isIncludeSheetName());
 
-        return new DataTableSpec[]{spec, labelSpec};
+        return new DataTableSpec[]{port0Spec, port1Spec};
     }
 
     @Override
@@ -112,34 +114,40 @@ public class ExcelFormReaderNodeModel extends NodeModel {
         final FormDefinition definition = FormDefinition.fromDataTable(inData[0]);
 
         final boolean wide = m_settings.getOutputFormat() == OutputFormat.WIDE;
-        final DataTableSpec spec = wide
+        final boolean includeLabelFields = m_settings.isIncludeLabelFields();
+        final boolean outputLabelPort = m_settings.isOutputLabelPort();
+
+        final DataTableSpec port0Spec = wide
             ? OutputSpecFactory.createWideSpec(definition,
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName(),
-                false) // TODO L3: wire includeLabelFields from settings
+                includeLabelFields)
             : OutputSpecFactory.createLongSpec(
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName());
 
-        final BufferedDataContainer container = exec.createDataContainer(spec);
+        final BufferedDataContainer container = exec.createDataContainer(port0Spec);
 
-        // TODO L3: wire includeSourceFilename/includeSheetName from settings for label spec
-        final DataTableSpec labelSpec = OutputSpecFactory.createLabelSpec(false, false);
-        final BufferedDataContainer labelContainer = exec.createDataContainer(labelSpec);
-        labelContainer.close();
+        final DataTableSpec port1Spec = OutputSpecFactory.createLabelSpec(
+            m_settings.isIncludeSourceFilename(),
+            m_settings.isIncludeSheetName());
+        final BufferedDataContainer labelContainer = exec.createDataContainer(port1Spec);
 
         final WideOutputBuilder wideBuilder = wide
-            ? new WideOutputBuilder(spec,
+            ? new WideOutputBuilder(port0Spec,
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName(),
-                false) // TODO L3: wire includeLabelFields from settings
+                includeLabelFields)
             : null;
         final LongOutputBuilder longBuilder = !wide
-            ? new LongOutputBuilder(spec,
+            ? new LongOutputBuilder(port0Spec,
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName(),
-                false) // TODO L3: wire includeLabelFields from settings
+                includeLabelFields)
             : null;
+        final LabelOutputBuilder labelBuilder = new LabelOutputBuilder(port1Spec,
+            m_settings.isIncludeSourceFilename(),
+            m_settings.isIncludeSheetName());
 
         final ExcelFormExtractor extractor = new ExcelFormExtractor(m_settings);
 
@@ -167,6 +175,7 @@ public class ExcelFormReaderNodeModel extends NodeModel {
         }
 
         long rowIndex = 0;
+        long labelRowIndex = 0;
         try (WorkbookIterator iterator = new WorkbookIterator(
                 Paths.get(path),
                 readingMode,
@@ -216,10 +225,18 @@ public class ExcelFormReaderNodeModel extends NodeModel {
                     rows.forEach(container::addRowToTable);
                     rowIndex += rows.size();
                 }
+
+                if (outputLabelPort) {
+                    final List<DataRow> labelRows = labelBuilder.buildRows(
+                        filePath, sheetName, values, definition, labelRowIndex);
+                    labelRows.forEach(labelContainer::addRowToTable);
+                    labelRowIndex += labelRows.size();
+                }
             }
         }
 
         container.close();
+        labelContainer.close();
         return new BufferedDataTable[]{container.getTable(), labelContainer.getTable()};
     }
 

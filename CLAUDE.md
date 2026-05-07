@@ -159,8 +159,25 @@ Each (file, sheet) pair = one form instance = one output row (wide mode).
 | Output | Output format | Enum | Wide |
 | Output | Add provenance columns | Boolean | true |
 | Output | Range delimiter | String | `, ` |
+| Output | Include label fields in port 0 | Boolean | false |
+| Output | Output label fields in port 1 | Boolean | true |
 | Error handling | On missing cell | Enum | WARN |
 | Error handling | On unparseable value | Enum | WARN |
+
+### Output Ports
+
+**Port 0 — Main output:**
+- Always contains data fields (`Content Type = "data"`)
+- Optionally contains label fields (`Content Type = "label"`) — controlled by "Include label fields in port 0" toggle (default: false)
+- Wide or long format per dialog setting
+- Definition table order preserved throughout
+
+**Port 1 — Label fields output:**
+- Fixed wide format regardless of Port 0 format setting
+- One row per label field per (file, sheet) pair
+- Fixed columns (in order): `Source File` (if provenance enabled), `Sheet Name` (if provenance enabled), `Name`, `Cell Range`, `Cell Content`
+- Controlled by "Output label fields in port 1" toggle (default: true)
+- Always produced as an empty table when toggle is disabled
 
 ---
 

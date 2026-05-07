@@ -44,6 +44,8 @@ public class ExcelFormReaderSettings {
     private static final String CFG_FOLDER_SHEET_NAME           = "cfg_folderSheetName";
     private static final String CFG_FOLDER_SHEET_POSITION       = "cfg_folderSheetPosition";
     private static final String CFG_FOLDER_SINGLE_HIDDEN_SHEETS = "cfg_folderSingleHiddenSheets";
+    private static final String CFG_INCLUDE_LABEL_FIELDS        = "cfg_includeLabelFields";
+    private static final String CFG_OUTPUT_LABEL_PORT           = "cfg_outputLabelPort";
 
     // ── Enums ────────────────────────────────────────────────────────────────
 
@@ -155,6 +157,8 @@ public class ExcelFormReaderSettings {
     private final SettingsModelString  m_folderSheetName          = new SettingsModelString(CFG_FOLDER_SHEET_NAME, "");
     private final SettingsModelInteger m_folderSheetPosition      = new SettingsModelInteger(CFG_FOLDER_SHEET_POSITION, 0);
     private final SettingsModelBoolean m_folderSingleHiddenSheets = new SettingsModelBoolean(CFG_FOLDER_SINGLE_HIDDEN_SHEETS, false);
+    private final SettingsModelBoolean m_includeLabelFields       = new SettingsModelBoolean(CFG_INCLUDE_LABEL_FIELDS, false);
+    private final SettingsModelBoolean m_outputLabelPort          = new SettingsModelBoolean(CFG_OUTPUT_LABEL_PORT, true);
 
     // ── Typed getters ────────────────────────────────────────────────────────
 
@@ -230,6 +234,8 @@ public class ExcelFormReaderSettings {
     public String getFolderSheetName() { return m_folderSheetName.getStringValue(); }
     public int getFolderSheetPosition() { return m_folderSheetPosition.getIntValue(); }
     public boolean isFolderSingleIncludeHiddenSheets() { return m_folderSingleHiddenSheets.getBooleanValue(); }
+    public boolean isIncludeLabelFields()               { return m_includeLabelFields.getBooleanValue(); }
+    public boolean isOutputLabelPort()                  { return m_outputLabelPort.getBooleanValue(); }
 
     // ── Raw model getters ─────────────────────────────────────────────────────
 
@@ -262,6 +268,8 @@ public class ExcelFormReaderSettings {
     public SettingsModelString  getFolderSheetNameModel()           { return m_folderSheetName; }
     public SettingsModelInteger getFolderSheetPositionModel()       { return m_folderSheetPosition; }
     public SettingsModelBoolean getFolderSingleHiddenSheetsModel()  { return m_folderSingleHiddenSheets; }
+    public SettingsModelBoolean getIncludeLabelFieldsModel()        { return m_includeLabelFields; }
+    public SettingsModelBoolean getOutputLabelPortModel()           { return m_outputLabelPort; }
 
     // ── Persistence ───────────────────────────────────────────────────────────
 
@@ -295,6 +303,8 @@ public class ExcelFormReaderSettings {
         m_folderSheetName.saveSettingsTo(settings);
         m_folderSheetPosition.saveSettingsTo(settings);
         m_folderSingleHiddenSheets.saveSettingsTo(settings);
+        m_includeLabelFields.saveSettingsTo(settings);
+        m_outputLabelPort.saveSettingsTo(settings);
     }
 
     public void loadSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
@@ -327,6 +337,8 @@ public class ExcelFormReaderSettings {
         m_folderSheetName.loadSettingsFrom(settings);
         m_folderSheetPosition.loadSettingsFrom(settings);
         m_folderSingleHiddenSheets.loadSettingsFrom(settings);
+        m_includeLabelFields.loadSettingsFrom(settings);
+        m_outputLabelPort.loadSettingsFrom(settings);
     }
 
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
@@ -359,6 +371,8 @@ public class ExcelFormReaderSettings {
         m_folderSheetName.validateSettings(settings);
         m_folderSheetPosition.validateSettings(settings);
         m_folderSingleHiddenSheets.validateSettings(settings);
+        m_includeLabelFields.validateSettings(settings);
+        m_outputLabelPort.validateSettings(settings);
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────
