@@ -201,6 +201,12 @@ public class CellMetadataReader {
         // Range-based list — resolve cell values
         try {
             String rangeRef = formula;
+            // TODO: Cross-sheet list resolution not yet supported.
+            // If the list source is on a different sheet
+            // (e.g. Config!$A$1:$A$5), the sheet prefix is stripped
+            // and resolution falls back to the raw formula string.
+            // Fix: accept Workbook parameter and look up the named
+            // sheet via workbook.getSheet(sheetName).
             if (rangeRef.contains("!")) {
                 rangeRef = rangeRef.substring(rangeRef.indexOf("!") + 1);
             }
