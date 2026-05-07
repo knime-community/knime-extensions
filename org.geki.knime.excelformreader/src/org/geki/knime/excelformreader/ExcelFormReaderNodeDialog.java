@@ -54,6 +54,8 @@ public class ExcelFormReaderNodeDialog extends NodeDialogPane {
     private final JRadioButton m_longRadio             = new JRadioButton("Long");
     private final JCheckBox    m_includeSourceFilename = new JCheckBox("Include source filename");
     private final JCheckBox    m_includeSheetName      = new JCheckBox("Include sheet name");
+    private final JCheckBox    m_includeLabelFields    = new JCheckBox("Include label fields in port 0");
+    private final JCheckBox    m_outputLabelPort       = new JCheckBox("Output label fields in port 1");
 
     private final JRadioButton m_missingCellWarn = new JRadioButton("Warn and insert missing value");
     private final JRadioButton m_missingCellFail = new JRadioButton("Fail");
@@ -151,6 +153,8 @@ public class ExcelFormReaderNodeDialog extends NodeDialogPane {
         outputGroup.add(m_longRadio);
         m_wideRadio.setSelected(true);
 
+        m_outputLabelPort.setSelected(true);
+
         JPanel outputBox = createGroupBox("Output");
         outputBox.add(new JLabel("Output format:"), gbc(0, 0, 1, false));
         outputBox.add(m_wideRadio,                  gbc(1, 0, 1, false));
@@ -158,6 +162,8 @@ public class ExcelFormReaderNodeDialog extends NodeDialogPane {
         outputBox.add(new JPanel(),                 gbc(3, 0, 1, true));  // stretch filler
         outputBox.add(m_includeSourceFilename,      gbc(0, 1, 4, false));
         outputBox.add(m_includeSheetName,           gbc(0, 2, 4, false));
+        outputBox.add(m_includeLabelFields,         gbc(0, 3, 4, false));
+        outputBox.add(m_outputLabelPort,            gbc(0, 4, 4, false));
 
         // ── Error Handling group box ──────────────────────────────────────────
         ButtonGroup missingGroup = new ButtonGroup();
@@ -643,6 +649,10 @@ public class ExcelFormReaderNodeDialog extends NodeDialogPane {
             m_includeSourceFilename.isSelected());
         m_settings.getIncludeSheetNameModel().setBooleanValue(
             m_includeSheetName.isSelected());
+        m_settings.getIncludeLabelFieldsModel().setBooleanValue(
+            m_includeLabelFields.isSelected());
+        m_settings.getOutputLabelPortModel().setBooleanValue(
+            m_outputLabelPort.isSelected());
         m_settings.getOnMissingCellModel().setStringValue(
             m_missingCellWarn.isSelected() ? "WARN" : "FAIL");
         m_settings.getOnBadValueModel().setStringValue(
@@ -732,6 +742,8 @@ public class ExcelFormReaderNodeDialog extends NodeDialogPane {
 
         m_includeSourceFilename.setSelected(m_settings.isIncludeSourceFilename());
         m_includeSheetName.setSelected(m_settings.isIncludeSheetName());
+        m_includeLabelFields.setSelected(m_settings.isIncludeLabelFields());
+        m_outputLabelPort.setSelected(m_settings.isOutputLabelPort());
 
         m_missingCellWarn.setSelected(m_settings.getOnMissingCell() == ErrorHandling.WARN);
         m_missingCellFail.setSelected(m_settings.getOnMissingCell() == ErrorHandling.FAIL);
