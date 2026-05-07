@@ -95,21 +95,21 @@ public class ExcelFormReaderNodeModel extends NodeModel {
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName(),
                 m_settings.isIncludeLabelFields(),
-                false, // TODO M4: wire includeFormatCondition
-                false); // TODO M4: wire includeValidationType
+                m_settings.isIncludeFormatCondition(),
+                m_settings.isIncludeValidationType());
         } else {
             port0Spec = OutputSpecFactory.createLongSpec(
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName(),
-                false, // TODO M4: wire includeFormatCondition
-                false); // TODO M4: wire includeValidationType
+                m_settings.isIncludeFormatCondition(),
+                m_settings.isIncludeValidationType());
         }
 
         final DataTableSpec port1Spec = OutputSpecFactory.createLabelSpec(
             m_settings.isIncludeSourceFilename(),
             m_settings.isIncludeSheetName(),
-            false, // TODO M4: wire includeFormatCondition
-            false); // TODO M4: wire includeValidationType
+            m_settings.isIncludeFormatCondition(),
+            m_settings.isIncludeValidationType());
 
         return new DataTableSpec[]{port0Spec, port1Spec};
     }
@@ -128,21 +128,21 @@ public class ExcelFormReaderNodeModel extends NodeModel {
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName(),
                 includeLabelFields,
-                false, // TODO M4: wire includeFormatCondition
-                false) // TODO M4: wire includeValidationType
+                m_settings.isIncludeFormatCondition(),
+                m_settings.isIncludeValidationType())
             : OutputSpecFactory.createLongSpec(
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName(),
-                false, // TODO M4: wire includeFormatCondition
-                false); // TODO M4: wire includeValidationType
+                m_settings.isIncludeFormatCondition(),
+                m_settings.isIncludeValidationType());
 
         final BufferedDataContainer container = exec.createDataContainer(port0Spec);
 
         final DataTableSpec port1Spec = OutputSpecFactory.createLabelSpec(
             m_settings.isIncludeSourceFilename(),
             m_settings.isIncludeSheetName(),
-            false, // TODO M4: wire includeFormatCondition
-            false); // TODO M4: wire includeValidationType
+            m_settings.isIncludeFormatCondition(),
+            m_settings.isIncludeValidationType());
         final BufferedDataContainer labelContainer = exec.createDataContainer(port1Spec);
 
         final WideOutputBuilder wideBuilder = wide
@@ -150,22 +150,22 @@ public class ExcelFormReaderNodeModel extends NodeModel {
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName(),
                 includeLabelFields,
-                false, // TODO M4: wire includeFormatCondition
-                false) // TODO M4: wire includeValidationType
+                m_settings.isIncludeFormatCondition(),
+                m_settings.isIncludeValidationType())
             : null;
         final LongOutputBuilder longBuilder = !wide
             ? new LongOutputBuilder(port0Spec,
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName(),
                 includeLabelFields,
-                false, // TODO M4: wire includeFormatCondition
-                false) // TODO M4: wire includeValidationType
+                m_settings.isIncludeFormatCondition(),
+                m_settings.isIncludeValidationType())
             : null;
         final LabelOutputBuilder labelBuilder = new LabelOutputBuilder(port1Spec,
             m_settings.isIncludeSourceFilename(),
             m_settings.isIncludeSheetName(),
-            false, // TODO M4: wire includeFormatCondition
-            false); // TODO M4: wire includeValidationType
+            m_settings.isIncludeFormatCondition(),
+            m_settings.isIncludeValidationType());
 
         final ExcelFormExtractor extractor = new ExcelFormExtractor(m_settings);
 

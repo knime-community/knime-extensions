@@ -46,6 +46,8 @@ public class ExcelFormReaderSettings {
     private static final String CFG_FOLDER_SINGLE_HIDDEN_SHEETS = "cfg_folderSingleHiddenSheets";
     private static final String CFG_INCLUDE_LABEL_FIELDS        = "cfg_includeLabelFields";
     private static final String CFG_OUTPUT_LABEL_PORT           = "cfg_outputLabelPort";
+    private static final String CFG_INCLUDE_FORMAT_CONDITION    = "cfg_includeFormatCondition";
+    private static final String CFG_INCLUDE_VALIDATION_TYPE     = "cfg_includeValidationType";
 
     // ── Enums ────────────────────────────────────────────────────────────────
 
@@ -159,6 +161,8 @@ public class ExcelFormReaderSettings {
     private final SettingsModelBoolean m_folderSingleHiddenSheets = new SettingsModelBoolean(CFG_FOLDER_SINGLE_HIDDEN_SHEETS, false);
     private final SettingsModelBoolean m_includeLabelFields       = new SettingsModelBoolean(CFG_INCLUDE_LABEL_FIELDS, false);
     private final SettingsModelBoolean m_outputLabelPort          = new SettingsModelBoolean(CFG_OUTPUT_LABEL_PORT, true);
+    private final SettingsModelBoolean m_includeFormatCondition   = new SettingsModelBoolean(CFG_INCLUDE_FORMAT_CONDITION, false);
+    private final SettingsModelBoolean m_includeValidationType    = new SettingsModelBoolean(CFG_INCLUDE_VALIDATION_TYPE, false);
 
     // ── Typed getters ────────────────────────────────────────────────────────
 
@@ -236,6 +240,8 @@ public class ExcelFormReaderSettings {
     public boolean isFolderSingleIncludeHiddenSheets() { return m_folderSingleHiddenSheets.getBooleanValue(); }
     public boolean isIncludeLabelFields()               { return m_includeLabelFields.getBooleanValue(); }
     public boolean isOutputLabelPort()                  { return m_outputLabelPort.getBooleanValue(); }
+    public boolean isIncludeFormatCondition()           { return m_includeFormatCondition.getBooleanValue(); }
+    public boolean isIncludeValidationType()            { return m_includeValidationType.getBooleanValue(); }
 
     // ── Raw model getters ─────────────────────────────────────────────────────
 
@@ -270,6 +276,8 @@ public class ExcelFormReaderSettings {
     public SettingsModelBoolean getFolderSingleHiddenSheetsModel()  { return m_folderSingleHiddenSheets; }
     public SettingsModelBoolean getIncludeLabelFieldsModel()        { return m_includeLabelFields; }
     public SettingsModelBoolean getOutputLabelPortModel()           { return m_outputLabelPort; }
+    public SettingsModelBoolean getIncludeFormatConditionModel()    { return m_includeFormatCondition; }
+    public SettingsModelBoolean getIncludeValidationTypeModel()     { return m_includeValidationType; }
 
     // ── Persistence ───────────────────────────────────────────────────────────
 
@@ -305,6 +313,8 @@ public class ExcelFormReaderSettings {
         m_folderSingleHiddenSheets.saveSettingsTo(settings);
         m_includeLabelFields.saveSettingsTo(settings);
         m_outputLabelPort.saveSettingsTo(settings);
+        m_includeFormatCondition.saveSettingsTo(settings);
+        m_includeValidationType.saveSettingsTo(settings);
     }
 
     public void loadSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
@@ -339,6 +349,8 @@ public class ExcelFormReaderSettings {
         m_folderSingleHiddenSheets.loadSettingsFrom(settings);
         m_includeLabelFields.loadSettingsFrom(settings);
         m_outputLabelPort.loadSettingsFrom(settings);
+        m_includeFormatCondition.loadSettingsFrom(settings);
+        m_includeValidationType.loadSettingsFrom(settings);
     }
 
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
@@ -373,6 +385,8 @@ public class ExcelFormReaderSettings {
         m_folderSingleHiddenSheets.validateSettings(settings);
         m_includeLabelFields.validateSettings(settings);
         m_outputLabelPort.validateSettings(settings);
+        m_includeFormatCondition.validateSettings(settings);
+        m_includeValidationType.validateSettings(settings);
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────
