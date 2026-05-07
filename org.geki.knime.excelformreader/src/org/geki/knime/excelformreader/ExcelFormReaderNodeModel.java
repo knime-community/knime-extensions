@@ -24,16 +24,12 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortType;
 
 public class ExcelFormReaderNodeModel extends NodeModel {
-
-    private static final NodeLogger LOGGER =
-        NodeLogger.getLogger(ExcelFormReaderNodeModel.class);
 
     private final ExcelFormReaderSettings m_settings = new ExcelFormReaderSettings();
 

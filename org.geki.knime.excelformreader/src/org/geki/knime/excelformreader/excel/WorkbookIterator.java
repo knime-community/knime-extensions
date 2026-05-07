@@ -43,7 +43,6 @@ public class WorkbookIterator implements Iterator<WorkbookIterator.Entry>, Close
     }
 
     private final List<Path>      files;
-    private final ReadingMode     mode;
     private final boolean         processManySheets;
     private final SheetSelection  sheetSelection;
     private final String          sheetName;
@@ -75,7 +74,6 @@ public class WorkbookIterator implements Iterator<WorkbookIterator.Entry>, Close
                              final boolean includeHiddenFolders,
                              final boolean filterByExtension,
                              final Set<String> fileExtensions) throws IOException {
-        this.mode               = mode;
         this.processManySheets  = processManySheets;
         this.sheetSelection     = (sheetSelection != null) ? sheetSelection : SheetSelection.FIRST;
         this.sheetName          = (sheetName != null) ? sheetName : "";

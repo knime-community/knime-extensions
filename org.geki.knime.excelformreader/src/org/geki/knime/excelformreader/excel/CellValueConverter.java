@@ -91,15 +91,15 @@ public class CellValueConverter {
 
     private static DataCell convertToBoolean(final CellValue cellValue) {
         if (cellValue.getCellType() == CellType.BOOLEAN) {
-            return BooleanCell.get(cellValue.getBooleanValue());
+            return cellValue.getBooleanValue() ? BooleanCell.TRUE : BooleanCell.FALSE;
         }
         if (cellValue.getCellType() == CellType.STRING) {
             final String val = cellValue.getStringValue().trim().toLowerCase();
             if ("true".equals(val) || "yes".equals(val) || "1".equals(val)) {
-                return BooleanCell.get(true);
+                return BooleanCell.TRUE;
             }
             if ("false".equals(val) || "no".equals(val) || "0".equals(val)) {
-                return BooleanCell.get(false);
+                return BooleanCell.FALSE;
             }
         }
         return DataType.getMissingCell();
