@@ -43,7 +43,7 @@ public class WideOutputBuilder {
 
         for (final FieldMapping mapping : definition.getFields()) {
             final DataCell value = extractedValues != null
-                ? extractedValues.get(mapping.getFieldName())
+                ? extractedValues.get(mapping.getName())
                 : null;
             cells[i++] = (value != null) ? value : DataType.getMissingCell();
         }

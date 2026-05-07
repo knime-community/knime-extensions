@@ -47,10 +47,10 @@ public class LongOutputBuilder {
                 cells[col++] = new StringCell(sheetName != null ? sheetName : "");
             }
 
-            cells[col++] = new StringCell(mapping.getFieldName());
+            cells[col++] = new StringCell(mapping.getName());
 
             final DataCell raw = (extractedValues != null)
-                ? extractedValues.get(mapping.getFieldName())
+                ? extractedValues.get(mapping.getName())
                 : null;
             if (raw == null || raw.isMissing()) {
                 cells[col++] = DataType.getMissingCell();

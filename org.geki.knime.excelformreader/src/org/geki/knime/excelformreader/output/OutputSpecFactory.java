@@ -32,7 +32,7 @@ public class OutputSpecFactory {
 
         for (final FieldMapping mapping : definition.getFields()) {
             cols.add(new DataColumnSpecCreator(
-                mapping.getFieldName(),
+                mapping.getName(),
                 dataTypeFromString(mapping.getDataType())).createSpec());
         }
 

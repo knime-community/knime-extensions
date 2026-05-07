@@ -128,9 +128,10 @@ the node generic and reusable across any form layout.
 ### Form definition table schema
 | Column | Required | Type | Description |
 |---|---|---|---|
-| `field_name` | ✅ | String | Output column name |
-| `value_cell` | ✅ | String | Cell address (`C4`) or range (`B10:D15`) |
-| `data_type` | ❌ | String | `string`/`int`/`double`/`date`/`boolean` — defaults to `string` |
+| `Name` | ✅ | String | Output column name |
+| `Cell Range` | ✅ | String | Cell address (`C4`) or range (`B10:D15`) |
+| `Content Type` | ❌ | String | `data` / `label` — defaults to `data` |
+| `Data Type` | ❌ | String | `string`/`int`/`double`/`date`/`boolean` — defaults to `string` |
 
 ### Reading modes
 | Mode | Description |

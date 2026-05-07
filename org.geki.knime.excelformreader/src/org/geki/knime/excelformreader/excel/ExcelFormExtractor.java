@@ -37,9 +37,9 @@ public class ExcelFormExtractor {
 
         for (final FieldMapping mapping : definition.getFields()) {
             if (mapping.getAddress().isSingleCell()) {
-                result.put(mapping.getFieldName(), extractSingleCell(sheet, mapping, evaluator));
+                result.put(mapping.getName(), extractSingleCell(sheet, mapping, evaluator));
             } else {
-                result.put(mapping.getFieldName(), extractRange(sheet, mapping, evaluator));
+                result.put(mapping.getName(), extractRange(sheet, mapping, evaluator));
             }
         }
 
@@ -91,7 +91,7 @@ public class ExcelFormExtractor {
             ? "row " + addr.getStartRow() + ", col " + addr.getStartCol()
             : "rows " + addr.getStartRow() + "-" + addr.getEndRow()
               + ", cols " + addr.getStartCol() + "-" + addr.getEndCol();
-        final String msg = "Cell not found for field '" + mapping.getFieldName()
+        final String msg = "Cell not found for field '" + mapping.getName()
             + "' at address '" + addrStr + "' in sheet '" + sheet.getSheetName() + "'";
 
         if (settings.getOnMissingCell() == ExcelFormReaderSettings.ErrorHandling.FAIL) {

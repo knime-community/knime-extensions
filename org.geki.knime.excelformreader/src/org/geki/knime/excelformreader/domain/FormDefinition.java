@@ -3,6 +3,7 @@ package org.geki.knime.excelformreader.domain;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataRow;
@@ -27,6 +28,14 @@ public class FormDefinition {
     public List<FieldMapping> getFields() { return fields; }
     public int size() { return fields.size(); }
 
+    public List<FieldMapping> getDataFields() {
+        return fields.stream().filter(FieldMapping::isData).collect(Collectors.toList());
+    }
+
+    public List<FieldMapping> getLabelFields() {
+        return fields.stream().filter(FieldMapping::isLabel).collect(Collectors.toList());
+    }
+
     // Private no-arg constructor for the configure()-time sentinel (empty fields list).
     private FormDefinition() {
         this.fields = Collections.emptyList();
@@ -38,13 +47,13 @@ public class FormDefinition {
      */
     public static FormDefinition fromSpec(final DataTableSpec spec)
             throws InvalidSettingsException {
-        if (findColumnIndex(spec, "field_name") < 0) {
+        if (findColumnIndex(spec, "Name") < 0) {
             throw new InvalidSettingsException(
-                "Form definition table is missing required column 'field_name'");
+                "Form definition table is missing required column 'Name'");
         }
-        if (findColumnIndex(spec, "value_cell") < 0) {
+        if (findColumnIndex(spec, "Cell Range") < 0) {
             throw new InvalidSettingsException(
-                "Form definition table is missing required column 'value_cell'");
+                "Form definition table is missing required column 'Cell Range'");
         }
         return new FormDefinition();
     }
@@ -53,35 +62,38 @@ public class FormDefinition {
             throws InvalidSettingsException {
         final DataTableSpec spec = table.getDataTableSpec();
 
-        final int fieldNameIdx = findColumnIndex(spec, "field_name");
-        if (fieldNameIdx < 0) {
+        final int nameIdx = findColumnIndex(spec, "Name");
+        if (nameIdx < 0) {
             throw new InvalidSettingsException(
-                "Form definition table is missing required column 'field_name'");
+                "Form definition table is missing required column 'Name'");
         }
-        final int valueCellIdx = findColumnIndex(spec, "value_cell");
-        if (valueCellIdx < 0) {
+        final int cellRangeIdx = findColumnIndex(spec, "Cell Range");
+        if (cellRangeIdx < 0) {
             throw new InvalidSettingsException(
-                "Form definition table is missing required column 'value_cell'");
+                "Form definition table is missing required column 'Cell Range'");
         }
-        final int dataTypeIdx = findColumnIndex(spec, "data_type");
+        final int contentTypeIdx = findColumnIndex(spec, "Content Type");
+        final int dataTypeIdx = findColumnIndex(spec, "Data Type");
 
         final List<FieldMapping> mappings = new ArrayList<>();
         for (final DataRow row : table) {
-            final DataCell fieldNameCell = row.getCell(fieldNameIdx);
-            final DataCell valueCellCell = row.getCell(valueCellIdx);
+            final DataCell nameCell = row.getCell(nameIdx);
+            final DataCell cellRangeCell = row.getCell(cellRangeIdx);
 
-            if (fieldNameCell.isMissing() || valueCellCell.isMissing()) {
-                LOGGER.warn("Skipping row " + row.getKey() + ": field_name or value_cell is missing");
+            if (nameCell.isMissing() || cellRangeCell.isMissing()) {
+                LOGGER.warn("Skipping row " + row.getKey() + ": Name or Cell Range is missing");
                 continue;
             }
 
-            final String fieldName = fieldNameCell.toString();
-            final String valueCell = valueCellCell.toString();
+            final String name = nameCell.toString();
+            final String cellRange = cellRangeCell.toString();
+            final String contentType = (contentTypeIdx >= 0 && !row.getCell(contentTypeIdx).isMissing())
+                ? row.getCell(contentTypeIdx).toString() : null;
             final String dataType = (dataTypeIdx >= 0 && !row.getCell(dataTypeIdx).isMissing())
                 ? row.getCell(dataTypeIdx).toString() : null;
 
             try {
-                mappings.add(new FieldMapping(fieldName, valueCell, dataType));
+                mappings.add(new FieldMapping(name, cellRange, contentType, dataType));
             } catch (final IllegalArgumentException e) {
                 LOGGER.warn("Skipping row " + row.getKey() + ": " + e.getMessage());
             }
