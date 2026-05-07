@@ -127,7 +127,8 @@ the node generic and reusable across any form layout.
 | Port | Direction | Type | Description |
 |---|---|---|---|
 | 0 | Input | BufferedDataTable | Form definition table |
-| 0 | Output | BufferedDataTable | Extracted data |
+| 0 | Output | BufferedDataTable | Extracted data (wide or long) |
+| 1 | Output | BufferedDataTable | Label fields (always produced, may be empty) |
 
 ### Form definition table schema
 | Column | Required | Type | Description |
@@ -155,31 +156,59 @@ Each (file, sheet) pair = one form instance = one output row (wide mode).
 ### Dialog settings
 | Panel | Setting | Type | Default |
 |---|---|---|---|
-| File/Folder | Reading mode | Enum | SINGLE_FILE |
-| File/Folder | Path | String | — |
-| File/Folder | Include subfolders | Boolean | false |
-| Sheet | Default sheet name | String | first sheet |
-| Sheet | Excluded sheet names | String (comma-separated) | `Config` |
-| Output | Output format | Enum | Wide |
-| Output | Add provenance columns | Boolean | true |
-| Output | Range delimiter | String | `, ` |
-| Output | Include label fields in port 0 | Boolean | false |
-| Output | Output label fields in port 1 | Boolean | true |
-| Error handling | On missing cell | Enum | WARN |
-| Error handling | On unparseable value | Enum | WARN |
+| General / Input | Input mode | Radio | Single File |
+| General / Output | Output format | Radio | Wide |
+| General / Output | Include source filename | Boolean | true |
+| General / Output | Include sheet name | Boolean | true |
+| General / Output | Include label fields in port 0 | Boolean | false |
+| General / Output | Output label fields in port 1 | Boolean | true |
+| General / Output | Include format condition operator columns | Boolean | false |
+| General / Output | Include validation type columns | Boolean | false |
+| General / Error Handling | On missing cell | Radio | Warn |
+| General / Error Handling | On unparseable value | Radio | Warn |
+| File / Input Location | Read from | Dropdown | Local File System |
+| File / Input Location | File path | String | — |
+| File / Select Sheet(s) | Process single/many sheets | Radio | Single |
+| File / Select Sheet(s) | Sheet selection (single) | Radio | First |
+| File / Select Sheet(s) | Include hidden worksheets (single) | Boolean | false |
+| File / Select Sheet(s) | Sheet filter mode (many) | Radio | All |
+| File / Select Sheet(s) | Include hidden worksheets (many) | Boolean | false |
+| Folder / Input Location | Folder path | String | — |
+| Folder / Input Location | Include subfolders | Boolean | false |
+| Folder / Input Location | Include hidden folders | Boolean | false |
+| Folder / File Filter | Filter by file extension | Radio | Selected |
+| Folder / File Filter | File extensions | String | xlsx |
+| Folder / File Filter | Include hidden files | Boolean | false |
+| Folder / Select Sheet(s) | Process single/many sheets | Radio | Single |
+| Folder / Select Sheet(s) | Sheet selection (single) | Radio | First |
+| Folder / Select Sheet(s) | Include hidden worksheets (single) | Boolean | false |
+| Folder / Select Sheet(s) | Sheet filter mode (many) | Radio | All |
+| Folder / Select Sheet(s) | Include hidden worksheets (many) | Boolean | false |
 
 ### Output Ports
 
-**Port 0 — Main output:**
-- Always contains data fields (`Content Type = "data"`)
-- Optionally contains label fields (`Content Type = "label"`) — controlled by "Include label fields in port 0" toggle (default: false)
-- Wide or long format per dialog setting
-- Definition table order preserved throughout
+**Port 0 — Main output (wide mode columns in order):**
+1. `source_file` (String, optional)
+2. `sheet_name` (String, optional)
+3. Per field in definition order:
+   - `<Name>` — value typed per Data Type
+   - `<Name> (Format Condition Operator)` — String, optional (toggle)
+   - `<Name> (Validation Type)` — String, optional (toggle)
+
+Label fields included when "Include label fields in port 0" is enabled.
+
+**Port 0 — Main output (long mode columns in order):**
+1. `source_file` (String, optional)
+2. `sheet_name` (String, optional)
+3. `field_name` (String)
+4. `value` (String)
+5. `Format Condition Operator` (String, optional)
+6. `Validation Type` (String, optional)
 
 **Port 1 — Label fields output:**
 - Fixed wide format regardless of Port 0 format setting
 - One row per label field per (file, sheet) pair
-- Fixed columns (in order): `Source File` (if provenance enabled), `Sheet Name` (if provenance enabled), `Name`, `Cell Range`, `Cell Content`
+- Columns (in order): `Source File` (optional), `Sheet Name` (optional), `Name`, `Cell Range`, `Cell Content`, `Format Condition Operator` (optional), `Validation Type` (optional)
 - Controlled by "Output label fields in port 1" toggle (default: true)
 - Always produced as an empty table when toggle is disabled
 
@@ -197,28 +226,43 @@ org.geki.knime.excelformreader/
 
   domain/
     FieldMapping                — One row from the definition table
-                                  (fieldName, valueCell, dataType, sheetName)
+                                  (name, cellRange, contentType, dataType)
+                                  isData() / isLabel() convenience methods
     FormDefinition              — List<FieldMapping>, static factory
                                   fromDataTable(BufferedDataTable)
+                                  getDataFields() / getLabelFields()
     CellAddress                 — Parses "C4" / "B10:D15" into typed fields,
-                                  validates format
+                                  validates format; toString() produces
+                                  canonical address string
     ReadingMode                 — Enum: SINGLE_FILE, FOLDER
 
   excel/
     WorkbookIterator            — Lazy Iterator<Entry> over (Path, Sheet) pairs
-                                  Respects excluded sheets, recursive flag
+                                  Respects sheet filter, hidden sheet flag,
+                                  recursive folder walk
                                   Opens/closes workbooks one at a time
     ExcelFormExtractor          — POI-based: resolves FormDefinition against
-                                  a Sheet → Map<String, DataCell>
+                                  a Sheet → Map<String, CellExtractionResult>
+                                  CellExtractionResult holds value +
+                                  formatConditionOperator + validationType
                                   Evaluates formulas transparently
     CellValueConverter          — POI Cell → KNIME DataCell per data_type
                                   Handles string/int/double/date/boolean
+    CellMetadataReader          — Stateless; reads conditional formatting
+                                  operators and data validation types per cell
+                                  Resolves LIST validation options including
+                                  inline lists, same-sheet ranges, cross-sheet
+                                  ranges, and named ranges
+                                  Always requires Workbook parameter
 
   output/
     OutputSpecFactory           — Creates DataTableSpec at configure() time
-                                  createWideSpec() / createLongSpec()
+                                  createWideSpec() / createLongSpec() /
+                                  createLabelSpec()
     WideOutputBuilder           — One DataRow per (file, sheet)
     LongOutputBuilder           — N DataRows per (file, sheet, field)
+    LabelOutputBuilder          — One DataRow per label field per (file, sheet)
+                                  Produces Port 1 output
 ```
 
 ---
@@ -256,6 +300,21 @@ org.geki.knime.excelformreader/
 
 10. **Sheet exclusion** — comparison is case-insensitive and trimmed.
 
+11. **Content Type filtering** — use `FormDefinition.getDataFields()` and
+    `FormDefinition.getLabelFields()` for filtered iteration. Never filter
+    inline in builders.
+
+12. **Cell metadata** — `CellMetadataReader` is stateless. Always pass
+    `Workbook` to enable cross-sheet list resolution. Range delimiter is
+    hardcoded as `", "` in `ExcelFormExtractor`.
+
+13. **Port 1** — always produced (may be empty table). Empty is simpler and
+    faster than an optional port for large volumes.
+
+14. **LIST validation resolution order** — (1) inline list, (2) named range,
+    (3) same-sheet range, (4) cross-sheet range,
+    (5) fall back to raw formula string.
+
 ---
 
 ## Apache POI Notes
@@ -280,9 +339,10 @@ try (Workbook wb = WorkbookFactory.create(file.toFile(), null, true)) {
 ## KNIME API Notes
 
 ```java
-// Correct NodeModel constructor for 1 input, 1 output:
+// Correct NodeModel constructor for 1 input, 2 outputs:
 super(new PortType[]{BufferedDataTable.TYPE},
-      new PortType[]{BufferedDataTable.TYPE});
+      new PortType[]{BufferedDataTable.TYPE,
+                     BufferedDataTable.TYPE});
 
 // DataCell types to use:
 StringCell, IntCell, DoubleCell, BooleanCell, DateAndTimeCell, MissingCell
@@ -300,18 +360,21 @@ return new BufferedDataTable[]{container.getTable()};
 
 ## What Is Not Yet Implemented
 
-All Java classes currently exist as stubs with TODO comments.
-Implementation order (start from the bottom up):
+Unit tests — planned for all layers:
+- `CellAddress.parse()` edge cases
+- `CellValueConverter` per data type
+- `FormDefinition.fromDataTable()` column validation
+- `WorkbookIterator` sheet filtering and file discovery
+- `CellMetadataReader` format condition and validation type reading
 
-1. `ExcelFormReaderSettings`
-2. `CellAddress`
-3. `FieldMapping` + `FormDefinition`
-4. `ReadingMode`
-5. `CellValueConverter`
-6. `ExcelFormExtractor`
-7. `WorkbookIterator`
-8. `OutputSpecFactory`
-9. `WideOutputBuilder` + `LongOutputBuilder`
-10. `ExcelFormReaderNodeModel`
-11. `ExcelFormReaderNodeDialog`
-12. `ExcelFormReaderNodeFactory`
+Known limitations:
+- `configure()` returns partial spec in WIDE mode (see TODO comment above
+  `configure()` in NodeModel — accepted, cosmetic only)
+- Format condition operator reads `CELL_VALUE_IS` rules for operator name;
+  other rule types return the condition type name instead
+
+## Node Icon
+
+Node icon extracted from the KNIME native Excel Reader node for visual
+consistency in the node repository.
+Located at: `icons/excelformreader.png`
