@@ -79,6 +79,29 @@
         columns. When disabled, port 1 produces an empty
         table.
       </option>
+      <option name="Include format condition operator columns">
+        When enabled, adds a Format Condition Operator
+        column immediately after each field value column
+        in wide mode, or as an additional fixed column in
+        long mode and port 1. The column contains the
+        conditional formatting rule operator(s) applied to
+        the cell (e.g. BETWEEN, EQUAL, GT). Multiple
+        operators are concatenated with the range
+        delimiter. Missing value when no conditional
+        formatting rule is applied to the cell.
+      </option>
+      <option name="Include validation type columns">
+        When enabled, adds a Validation Type column
+        immediately after each field value column (and
+        after the Format Condition Operator column if
+        enabled) in wide mode, or as an additional fixed
+        column in long mode and port 1. The column
+        contains the data validation type applied to the
+        cell (e.g. LIST, INTEGER, DATE). Multiple types
+        are concatenated with the range delimiter. Missing
+        value when no data validation rule is applied to
+        the cell.
+      </option>
       <option name="On missing cell">
         Warn and insert missing value: if a cell address
         cannot be resolved, a missing value is written
@@ -205,6 +228,10 @@
       field) triple, with fixed columns field_name and
       value. Label fields are included when the
       corresponding toggle is enabled in the General tab.
+      When format condition operator or validation type
+      columns are enabled, additional columns are appended
+      per field in wide mode, or as fixed columns in long
+      mode.
     </outPort>
     <outPort index="1" name="Label Fields">
       Label field values extracted from the form. One
@@ -212,7 +239,10 @@
       Fixed columns: Source File (optional), Sheet Name
       (optional), Name, Cell Range, Cell Content.
       Empty table when "Output label fields in port 1"
-      is disabled in the General tab.
+      is disabled in the General tab. When format
+      condition operator or validation type columns are
+      enabled, they appear as additional fixed columns
+      after Cell Content.
     </outPort>
   </ports>
 
