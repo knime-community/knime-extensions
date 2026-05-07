@@ -4,12 +4,12 @@
   <extension point="org.knime.workbench.repository.categories">
     <category
       path="/"
-      level-id="community-extensions"
-      name="Community Extensions"
+      level-id="datacraft-labs"
+      name="DataCraft Labs"
       icon="icons/excelformreader.png"
       after="org.knime.base"/>
     <category
-      path="/community-extensions"
+      path="/datacraft-labs"
       level-id="io"
       name="IO"
       icon="icons/excelformreader.png"
@@ -19,7 +19,7 @@
   <extension point="org.knime.workbench.repository.nodes">
     <node
       factory-class="org.geki.knime.excelformreader.ExcelFormReaderNodeFactory"
-      category-path="/community-extensions/io"
+      category-path="/datacraft-labs/io"
       after=""/>
   </extension>
 </plugin>

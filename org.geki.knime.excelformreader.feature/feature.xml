@@ -3,12 +3,22 @@
   id="org.geki.knime.excelformreader.feature"
   label="KNIME Excel Reader (non-tabular) Feature"
   version="1.0.0.qualifier"
-  provider-name="geki-research">
+  provider-name="DataCraft Labs">
 
   <description>
-    Provides the Excel Reader (non-tabular) node for extracting data from
-    non-tabular, form-structured Excel worksheets.
+    DataCraft Labs community KNIME extensions.
+    Provides nodes for advanced data ingestion and
+    transformation beyond the capabilities of native
+    KNIME nodes.
   </description>
+
+  <copyright>
+    Copyright 2025 DataCraft Labs
+  </copyright>
+
+  <license url="https://www.apache.org/licenses/LICENSE-2.0">
+    Apache License, Version 2.0
+  </license>
 
   <plugin
     id="org.geki.knime.excelformreader"

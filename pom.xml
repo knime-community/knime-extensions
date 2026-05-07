@@ -10,6 +10,11 @@
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <organization>
+    <name>DataCraft Labs</name>
+    <url>https://github.com/geki-research</url>
+  </organization>
+
   <modules>
     <module>org.geki.knime.excelformreader</module>
     <module>org.geki.knime.excelformreader.tests</module>
@@ -28,7 +33,7 @@
     <repository>
       <id>knime-p2</id>
       <layout>p2</layout>
-      <url>https://update.knime.com/analytics-platform/5.3</url>
+      <url>https://update.knime.com/analytics-platform/5.5</url>
     </repository>
   </repositories>
 

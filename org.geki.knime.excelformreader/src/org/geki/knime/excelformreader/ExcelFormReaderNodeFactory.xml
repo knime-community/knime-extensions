@@ -12,7 +12,8 @@
   <shortDescription>
     Reads non-tabular, form-structured Excel worksheets
     (.xlsx) into a KNIME data table using a configurable
-    field mapping definition.
+    field mapping definition. Compatible with KNIME Analytics
+    Platform 5.5 and later.
   </shortDescription>
 
   <fullDescription>

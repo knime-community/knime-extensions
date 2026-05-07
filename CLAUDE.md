@@ -9,6 +9,7 @@ Do not delete or rename it.
 
 **Repository:** https://github.com/geki-research/knime-extensions
 **Owner:** geki-research
+**Vendor:** DataCraft Labs
 **Purpose:** KNIME 5.x community extension nodes for advanced data ingestion
 and transformation.
 
@@ -114,8 +115,8 @@ Examples:
 
 **Plugin ID:** `org.geki.knime.excelformreader`
 **Node name:** Excel Reader (non-tabular)
-**Category:** `/community-extensions/io`
-**KNIME API version:** 5.3.x
+**Category:** `/datacraft-labs/io`
+**KNIME API version:** 5.5.x (minimum)
 
 ### What this node does
 Reads non-tabular, form-structured Excel worksheets (.xlsx) and extracts
