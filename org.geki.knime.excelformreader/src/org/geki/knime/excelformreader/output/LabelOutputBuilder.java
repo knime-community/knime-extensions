@@ -14,21 +14,18 @@ import org.knime.core.data.RowKey;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.StringCell;
 
-public class LongOutputBuilder {
+public class LabelOutputBuilder {
 
     private final DataTableSpec spec;
     private final boolean includeSourceFilename;
     private final boolean includeSheetName;
-    private final boolean includeLabelFields;
 
-    public LongOutputBuilder(final DataTableSpec spec,
-                              final boolean includeSourceFilename,
-                              final boolean includeSheetName,
-                              final boolean includeLabelFields) {
+    public LabelOutputBuilder(final DataTableSpec spec,
+                               final boolean includeSourceFilename,
+                               final boolean includeSheetName) {
         this.spec = spec;
         this.includeSourceFilename = includeSourceFilename;
         this.includeSheetName = includeSheetName;
-        this.includeLabelFields = includeLabelFields;
     }
 
     public List<DataRow> buildRows(final String sourceFile,
@@ -37,13 +34,10 @@ public class LongOutputBuilder {
                                     final FormDefinition definition,
                                     final long rowIndexBase) {
         final List<DataRow> rows = new ArrayList<>();
-        int i = 0;
+        final List<FieldMapping> labelFields = definition.getLabelFields();
 
-        final Iterable<FieldMapping> fields = includeLabelFields
-            ? definition.getFields()
-            : definition.getDataFields();
-
-        for (final FieldMapping mapping : fields) {
+        for (int i = 0; i < labelFields.size(); i++) {
+            final FieldMapping mapping = labelFields.get(i);
             final DataCell[] cells = new DataCell[spec.getNumColumns()];
             int col = 0;
 
@@ -55,22 +49,16 @@ public class LongOutputBuilder {
             }
 
             cells[col++] = new StringCell(mapping.getName());
+            cells[col++] = new StringCell(mapping.getAddress().toString());
 
             final DataCell raw = (extractedValues != null)
                 ? extractedValues.get(mapping.getName())
                 : null;
-            if (raw == null || raw.isMissing()) {
-                cells[col++] = DataType.getMissingCell();
-            } else {
-                cells[col++] = new StringCell(raw.toString());
-            }
+            cells[col++] = (raw == null || raw.isMissing())
+                ? DataType.getMissingCell()
+                : new StringCell(raw.toString());
 
-            while (col < cells.length) {
-                cells[col++] = DataType.getMissingCell();
-            }
-
-            rows.add(new DefaultRow(new RowKey("Row" + (rowIndexBase + i)), cells));
-            i++;
+            rows.add(new DefaultRow(new RowKey("LabelRow" + (rowIndexBase + i)), cells));
         }
 
         return rows;

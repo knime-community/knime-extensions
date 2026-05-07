@@ -101,6 +101,13 @@
       field. In long mode: one row per (file, sheet, field) triple, with
       fixed columns field_name (String) and value (String).
     </outPort>
+    <outPort index="1" name="Label Fields">
+      One row per label field per (file, sheet) pair. Fixed columns:
+      Source File (String, if provenance enabled), Sheet Name (String,
+      if provenance enabled), Name (String), Cell Range (String),
+      Cell Content (String). Always produced; empty when no label fields
+      are defined in the form definition table.
+    </outPort>
   </ports>
 
 </knimeNode>

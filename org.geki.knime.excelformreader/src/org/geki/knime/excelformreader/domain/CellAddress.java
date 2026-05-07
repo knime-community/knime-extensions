@@ -47,4 +47,13 @@ public class CellAddress {
     public int getEndRow() { return endRow; }
     public boolean isRange() { return isRange; }
     public boolean isSingleCell() { return !isRange; }
+
+    @Override
+    public String toString() {
+        final String start = new CellReference(startRow, startCol).formatAsString();
+        if (!isRange) {
+            return start;
+        }
+        return start + ":" + new CellReference(endRow, endCol).formatAsString();
+    }
 }

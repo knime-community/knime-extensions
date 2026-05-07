@@ -17,13 +17,16 @@ public class WideOutputBuilder {
     private final DataTableSpec spec;
     private final boolean includeSourceFilename;
     private final boolean includeSheetName;
+    private final boolean includeLabelFields;
 
     public WideOutputBuilder(final DataTableSpec spec,
                               final boolean includeSourceFilename,
-                              final boolean includeSheetName) {
+                              final boolean includeSheetName,
+                              final boolean includeLabelFields) {
         this.spec = spec;
         this.includeSourceFilename = includeSourceFilename;
         this.includeSheetName = includeSheetName;
+        this.includeLabelFields = includeLabelFields;
     }
 
     public DataRow buildRow(final String sourceFile,
@@ -41,7 +44,11 @@ public class WideOutputBuilder {
             cells[i++] = new StringCell(sheetName != null ? sheetName : "");
         }
 
-        for (final FieldMapping mapping : definition.getFields()) {
+        final Iterable<FieldMapping> fields = includeLabelFields
+            ? definition.getFields()
+            : definition.getDataFields();
+
+        for (final FieldMapping mapping : fields) {
             final DataCell value = extractedValues != null
                 ? extractedValues.get(mapping.getName())
                 : null;

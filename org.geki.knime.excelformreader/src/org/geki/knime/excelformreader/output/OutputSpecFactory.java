@@ -20,7 +20,8 @@ public class OutputSpecFactory {
 
     public static DataTableSpec createWideSpec(final FormDefinition definition,
                                                 final boolean includeSourceFilename,
-                                                final boolean includeSheetName) {
+                                                final boolean includeSheetName,
+                                                final boolean includeLabelFields) {
         final List<DataColumnSpec> cols = new ArrayList<>();
 
         if (includeSourceFilename) {
@@ -30,7 +31,11 @@ public class OutputSpecFactory {
             cols.add(new DataColumnSpecCreator("sheet_name", StringCell.TYPE).createSpec());
         }
 
-        for (final FieldMapping mapping : definition.getFields()) {
+        final List<FieldMapping> fields = includeLabelFields
+            ? definition.getFields()
+            : definition.getDataFields();
+
+        for (final FieldMapping mapping : fields) {
             cols.add(new DataColumnSpecCreator(
                 mapping.getName(),
                 dataTypeFromString(mapping.getDataType())).createSpec());
@@ -52,6 +57,24 @@ public class OutputSpecFactory {
 
         cols.add(new DataColumnSpecCreator("field_name", StringCell.TYPE).createSpec());
         cols.add(new DataColumnSpecCreator("value", StringCell.TYPE).createSpec());
+
+        return new DataTableSpec(cols.toArray(new DataColumnSpec[0]));
+    }
+
+    public static DataTableSpec createLabelSpec(final boolean includeSourceFilename,
+                                                 final boolean includeSheetName) {
+        final List<DataColumnSpec> cols = new ArrayList<>();
+
+        if (includeSourceFilename) {
+            cols.add(new DataColumnSpecCreator("Source File", StringCell.TYPE).createSpec());
+        }
+        if (includeSheetName) {
+            cols.add(new DataColumnSpecCreator("Sheet Name", StringCell.TYPE).createSpec());
+        }
+
+        cols.add(new DataColumnSpecCreator("Name", StringCell.TYPE).createSpec());
+        cols.add(new DataColumnSpecCreator("Cell Range", StringCell.TYPE).createSpec());
+        cols.add(new DataColumnSpecCreator("Cell Content", StringCell.TYPE).createSpec());
 
         return new DataTableSpec(cols.toArray(new DataColumnSpec[0]));
     }
