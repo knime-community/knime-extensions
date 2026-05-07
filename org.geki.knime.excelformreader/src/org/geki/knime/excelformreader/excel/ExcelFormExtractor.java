@@ -23,17 +23,33 @@ public class ExcelFormExtractor {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(ExcelFormExtractor.class);
 
+    private static final String RANGE_DELIMITER = ", ";
+
     private final ExcelFormReaderSettings settings;
 
     public ExcelFormExtractor(final ExcelFormReaderSettings settings) {
         this.settings = settings;
     }
 
-    public Map<String, DataCell> extract(final Sheet sheet,
-                                          final FormDefinition definition,
-                                          final Workbook workbook) {
+    public static final class CellExtractionResult {
+        public final DataCell value;
+        public final DataCell formatConditionOperator;
+        public final DataCell validationType;
+
+        public CellExtractionResult(final DataCell value,
+                                    final DataCell formatConditionOperator,
+                                    final DataCell validationType) {
+            this.value = value;
+            this.formatConditionOperator = formatConditionOperator;
+            this.validationType = validationType;
+        }
+    }
+
+    public Map<String, CellExtractionResult> extract(final Sheet sheet,
+                                                      final FormDefinition definition,
+                                                      final Workbook workbook) {
         final FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-        final Map<String, DataCell> result = new LinkedHashMap<>();
+        final Map<String, CellExtractionResult> result = new LinkedHashMap<>();
 
         for (final FieldMapping mapping : definition.getFields()) {
             if (mapping.getAddress().isSingleCell()) {
@@ -46,8 +62,8 @@ public class ExcelFormExtractor {
         return result;
     }
 
-    private DataCell extractSingleCell(final Sheet sheet, final FieldMapping mapping,
-                                        final FormulaEvaluator evaluator) {
+    private CellExtractionResult extractSingleCell(final Sheet sheet, final FieldMapping mapping,
+                                                    final FormulaEvaluator evaluator) {
         final CellAddress address = mapping.getAddress();
         final Row row = sheet.getRow(address.getStartRow());
         if (row == null) {
@@ -57,11 +73,14 @@ public class ExcelFormExtractor {
         if (cell == null) {
             return handleMissingCell(mapping, sheet);
         }
-        return CellValueConverter.convert(cell, mapping.getDataType(), evaluator);
+        final DataCell value = CellValueConverter.convert(cell, mapping.getDataType(), evaluator);
+        final DataCell fco = CellMetadataReader.readFormatConditionOperator(sheet, address, RANGE_DELIMITER);
+        final DataCell vt = CellMetadataReader.readValidationType(sheet, address, RANGE_DELIMITER);
+        return new CellExtractionResult(value, fco, vt);
     }
 
-    private DataCell extractRange(final Sheet sheet, final FieldMapping mapping,
-                                   final FormulaEvaluator evaluator) {
+    private CellExtractionResult extractRange(final Sheet sheet, final FieldMapping mapping,
+                                               final FormulaEvaluator evaluator) {
         final CellAddress address = mapping.getAddress();
         final List<String> values = new ArrayList<>();
 
@@ -79,13 +98,15 @@ public class ExcelFormExtractor {
             }
         }
 
-        if (values.isEmpty()) {
-            return DataType.getMissingCell();
-        }
-        return new StringCell(String.join(", ", values));
+        final DataCell value = values.isEmpty()
+            ? DataType.getMissingCell()
+            : new StringCell(String.join(RANGE_DELIMITER, values));
+        final DataCell fco = CellMetadataReader.readFormatConditionOperator(sheet, address, RANGE_DELIMITER);
+        final DataCell vt = CellMetadataReader.readValidationType(sheet, address, RANGE_DELIMITER);
+        return new CellExtractionResult(value, fco, vt);
     }
 
-    private DataCell handleMissingCell(final FieldMapping mapping, final Sheet sheet) {
+    private CellExtractionResult handleMissingCell(final FieldMapping mapping, final Sheet sheet) {
         final CellAddress addr = mapping.getAddress();
         final String addrStr = addr.isSingleCell()
             ? "row " + addr.getStartRow() + ", col " + addr.getStartCol()
@@ -98,6 +119,9 @@ public class ExcelFormExtractor {
             throw new RuntimeException(msg);
         }
         LOGGER.warn(msg);
-        return DataType.getMissingCell();
+        return new CellExtractionResult(
+            DataType.getMissingCell(),
+            DataType.getMissingCell(),
+            DataType.getMissingCell());
     }
 }

@@ -15,6 +15,9 @@ import org.geki.knime.excelformreader.output.LabelOutputBuilder;
 import org.geki.knime.excelformreader.output.LongOutputBuilder;
 import org.geki.knime.excelformreader.output.OutputSpecFactory;
 import org.geki.knime.excelformreader.output.WideOutputBuilder;
+import java.util.HashMap;
+
+import org.geki.knime.excelformreader.excel.ExcelFormExtractor.CellExtractionResult;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
@@ -209,8 +212,14 @@ public class ExcelFormReaderNodeModel extends NodeModel {
                 exec.setMessage("Reading sheet '" + entry.sheetName
                     + "' from " + entry.filePath.getFileName());
 
-                final Map<String, DataCell> values =
+                final Map<String, CellExtractionResult> results =
                     extractor.extract(entry.sheet, definition, entry.workbook);
+
+                // TODO M3: pass full CellExtractionResult map to builders for metadata columns
+                final Map<String, DataCell> values = new HashMap<>();
+                for (final Map.Entry<String, CellExtractionResult> e : results.entrySet()) {
+                    values.put(e.getKey(), e.getValue().value);
+                }
 
                 final String filePath = entry.filePath.toString();
                 final String sheetName = entry.sheetName;
