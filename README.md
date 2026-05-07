@@ -20,7 +20,7 @@ than in rows and columns.
 #### Key features
 
 - Form structure defined via a configurable input table
-  (field name → cell address mapping) — supports 60+
+  (field name to cell address mapping) — supports 60+
   fields without cumbersome dialog configuration
 - Reads single files, all sheets in a workbook, folders,
   and recursive folder structures
@@ -45,33 +45,41 @@ than in rows and columns.
 
 #### Node ports
 
-| Port | Direction | Type | Description |
-|---|---|---|---|
-| 0 | Input | Table | Form definition table |
-| 0 | Output | Table | Extracted data (wide or long) |
-| 1 | Output | Table | Label fields (for validation) |
+Port 0 Input: Form definition table
+Port 0 Output: Extracted data (wide or long format)
+Port 1 Output: Label fields (for downstream validation)
 
 #### Form definition table schema
 
-| Column | Required | Type | Description |
-|---|---|---|---|
-| `Name` | ✅ | String | Output column name |
-| `Cell Range` | ✅ | String | Cell address (`C4`) or range (`B10:D15`) |
-| `Content Type` | ❌ | String | `data` (default) or `label` |
-| `Data Type` | ❌ | String | `string` / `int` / `double` / `date` / `boolean` |
+Columns:
+- Name (required, String): output column name
+- Cell Range (required, String): cell address such as C4
+  or range such as B10:D15
+- Content Type (optional, String): "data" (default) or
+  "label"
+- Data Type (optional, String): string, int, double,
+  date, or boolean
 
 #### Dialog overview
 
-| Tab | Group box | Key settings |
-|---|---|---|
-| General | Input | Single File / Folder mode |
-| General | Output | Wide/Long, provenance columns, label field toggles |
-| General | Error Handling | Warn or Fail per error type |
-| File | Input Location | File path, Read from |
-| File | Select Sheet(s) | Single sheet (First/By name/By position) or many sheets (All/Blacklist/Whitelist) |
-| Folder | Input Location | Folder path, subfolders, hidden folders |
-| Folder | File Filter | Extension filter, hidden files |
-| Folder | Select Sheet(s) | Single sheet or many sheets per file |
+General tab:
+- Input group box: Single File or Folder mode
+- Output group box: Wide/Long format, provenance columns,
+  label field toggles
+- Error Handling group box: Warn or Fail per error type
+
+File tab:
+- Input Location group box: file path and Read from
+- Select Sheet(s) group box: single sheet (First, By
+  name, By position) or many sheets (All, Blacklist,
+  Whitelist)
+
+Folder tab:
+- Input Location group box: folder path, subfolders,
+  hidden folders
+- File Filter group box: extension filter, hidden files
+- Select Sheet(s) group box: single sheet or many sheets
+  per file
 
 ---
 
@@ -79,36 +87,52 @@ than in rows and columns.
 
 ### Prerequisites
 
-- Debian 12 (or compatible Linux)
-- JDK 17 (`openjdk-17-jdk`)
-- JDK 21 (`sdkman`) — required for Eclipse launch
-  configuration only
+- Debian 12 or compatible Linux
+- JDK 17 (openjdk-17-jdk) for building
+- JDK 21 via SDKMAN for Eclipse launch configuration only
 - Maven 3.9+
-- Eclipse for RCP and RAP Developers 2024-03+
-- KNIME SDK Setup:
-  https://github.com/knime/knime-sdk-setup
-  (use `KNIME-AP.target`)
+- Eclipse for RCP and RAP Developers 2024-03 or later
+- KNIME SDK Setup from https://github.com/knime/knime-sdk-setup
+  using KNIME-AP.target
 
 ### Build
 
-```bash
-cd ~/knime-dev/knime-extensions
-mvn clean verify
-```
+Run from the repository root:
 
-Build output (update site):
+  mvn clean verify
 
-```
-org.geki.knime.excelformreader.update/target/repository/
-```
+Build output (update site) is produced at:
 
-### Eclipse Setup
+  org.geki.knime.excelformreader.update/target/repository/
 
-1. Import all projects from this repository into Eclipse
-2. Activate the KNIME target platform via `knime-sdk-setup`
-   (`KNIME-AP.target`, 1897 plugins)
-3. Run a KNIME launch configuration to test nodes interactively
+### Eclipse setup
+
+1. Import all projects via File, Import, Maven,
+   Existing Maven Projects
+2. Activate the KNIME target platform by opening
+   KNIME-AP.target in org.knime.sdk.setup and clicking
+   Set as Active Target Platform
+3. Create an Eclipse Application launch configuration
+   pointing to org.knime.product.KNIME_PRODUCT with
+   JRE set to Java 21 and program argument -clean
+
+### Repository structure
+
+  knime-extensions/
+    pom.xml                                  parent POM
+    org.geki.knime.excelformreader/          plugin
+    org.geki.knime.excelformreader.feature/  feature
+    org.geki.knime.excelformreader.update/   update site
+    org.geki.knime.excelformreader.tests/    test project
+
+### Branching strategy
+
+- main: always releasable
+- develop: integration branch
+- feature/name: one branch per feature
+
+---
 
 ## License
 
-Apache License 2.0 — see [LICENSE](LICENSE)
+Apache License 2.0 — see LICENSE file.
