@@ -53,9 +53,9 @@ public class ExcelFormExtractor {
 
         for (final FieldMapping mapping : definition.getFields()) {
             if (mapping.getAddress().isSingleCell()) {
-                result.put(mapping.getName(), extractSingleCell(sheet, mapping, evaluator));
+                result.put(mapping.getName(), extractSingleCell(sheet, mapping, evaluator, workbook));
             } else {
-                result.put(mapping.getName(), extractRange(sheet, mapping, evaluator));
+                result.put(mapping.getName(), extractRange(sheet, mapping, evaluator, workbook));
             }
         }
 
@@ -63,7 +63,8 @@ public class ExcelFormExtractor {
     }
 
     private CellExtractionResult extractSingleCell(final Sheet sheet, final FieldMapping mapping,
-                                                    final FormulaEvaluator evaluator) {
+                                                    final FormulaEvaluator evaluator,
+                                                    final Workbook workbook) {
         final CellAddress address = mapping.getAddress();
         final Row row = sheet.getRow(address.getStartRow());
         if (row == null) {
@@ -74,13 +75,14 @@ public class ExcelFormExtractor {
             return handleMissingCell(mapping, sheet);
         }
         final DataCell value = CellValueConverter.convert(cell, mapping.getDataType(), evaluator);
-        final DataCell fco = CellMetadataReader.readFormatConditionOperator(sheet, address, RANGE_DELIMITER);
-        final DataCell vt = CellMetadataReader.readValidationType(sheet, address, RANGE_DELIMITER);
+        final DataCell fco = CellMetadataReader.readFormatConditionOperator(sheet, address, RANGE_DELIMITER, workbook);
+        final DataCell vt = CellMetadataReader.readValidationType(sheet, address, RANGE_DELIMITER, workbook);
         return new CellExtractionResult(value, fco, vt);
     }
 
     private CellExtractionResult extractRange(final Sheet sheet, final FieldMapping mapping,
-                                               final FormulaEvaluator evaluator) {
+                                               final FormulaEvaluator evaluator,
+                                               final Workbook workbook) {
         final CellAddress address = mapping.getAddress();
         final List<String> values = new ArrayList<>();
 
@@ -101,8 +103,8 @@ public class ExcelFormExtractor {
         final DataCell value = values.isEmpty()
             ? DataType.getMissingCell()
             : new StringCell(String.join(RANGE_DELIMITER, values));
-        final DataCell fco = CellMetadataReader.readFormatConditionOperator(sheet, address, RANGE_DELIMITER);
-        final DataCell vt = CellMetadataReader.readValidationType(sheet, address, RANGE_DELIMITER);
+        final DataCell fco = CellMetadataReader.readFormatConditionOperator(sheet, address, RANGE_DELIMITER, workbook);
+        final DataCell vt = CellMetadataReader.readValidationType(sheet, address, RANGE_DELIMITER, workbook);
         return new CellExtractionResult(value, fco, vt);
     }
 
