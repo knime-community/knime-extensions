@@ -15,10 +15,7 @@ import org.geki.knime.excelformreader.output.LabelOutputBuilder;
 import org.geki.knime.excelformreader.output.LongOutputBuilder;
 import org.geki.knime.excelformreader.output.OutputSpecFactory;
 import org.geki.knime.excelformreader.output.WideOutputBuilder;
-import java.util.HashMap;
-
 import org.geki.knime.excelformreader.excel.ExcelFormExtractor.CellExtractionResult;
-import org.knime.core.data.DataCell;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataContainer;
@@ -97,16 +94,22 @@ public class ExcelFormReaderNodeModel extends NodeModel {
             port0Spec = OutputSpecFactory.createWideSpec(definition,
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName(),
-                m_settings.isIncludeLabelFields());
+                m_settings.isIncludeLabelFields(),
+                false, // TODO M4: wire includeFormatCondition
+                false); // TODO M4: wire includeValidationType
         } else {
             port0Spec = OutputSpecFactory.createLongSpec(
                 m_settings.isIncludeSourceFilename(),
-                m_settings.isIncludeSheetName());
+                m_settings.isIncludeSheetName(),
+                false, // TODO M4: wire includeFormatCondition
+                false); // TODO M4: wire includeValidationType
         }
 
         final DataTableSpec port1Spec = OutputSpecFactory.createLabelSpec(
             m_settings.isIncludeSourceFilename(),
-            m_settings.isIncludeSheetName());
+            m_settings.isIncludeSheetName(),
+            false, // TODO M4: wire includeFormatCondition
+            false); // TODO M4: wire includeValidationType
 
         return new DataTableSpec[]{port0Spec, port1Spec};
     }
@@ -124,33 +127,45 @@ public class ExcelFormReaderNodeModel extends NodeModel {
             ? OutputSpecFactory.createWideSpec(definition,
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName(),
-                includeLabelFields)
+                includeLabelFields,
+                false, // TODO M4: wire includeFormatCondition
+                false) // TODO M4: wire includeValidationType
             : OutputSpecFactory.createLongSpec(
                 m_settings.isIncludeSourceFilename(),
-                m_settings.isIncludeSheetName());
+                m_settings.isIncludeSheetName(),
+                false, // TODO M4: wire includeFormatCondition
+                false); // TODO M4: wire includeValidationType
 
         final BufferedDataContainer container = exec.createDataContainer(port0Spec);
 
         final DataTableSpec port1Spec = OutputSpecFactory.createLabelSpec(
             m_settings.isIncludeSourceFilename(),
-            m_settings.isIncludeSheetName());
+            m_settings.isIncludeSheetName(),
+            false, // TODO M4: wire includeFormatCondition
+            false); // TODO M4: wire includeValidationType
         final BufferedDataContainer labelContainer = exec.createDataContainer(port1Spec);
 
         final WideOutputBuilder wideBuilder = wide
             ? new WideOutputBuilder(port0Spec,
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName(),
-                includeLabelFields)
+                includeLabelFields,
+                false, // TODO M4: wire includeFormatCondition
+                false) // TODO M4: wire includeValidationType
             : null;
         final LongOutputBuilder longBuilder = !wide
             ? new LongOutputBuilder(port0Spec,
                 m_settings.isIncludeSourceFilename(),
                 m_settings.isIncludeSheetName(),
-                includeLabelFields)
+                includeLabelFields,
+                false, // TODO M4: wire includeFormatCondition
+                false) // TODO M4: wire includeValidationType
             : null;
         final LabelOutputBuilder labelBuilder = new LabelOutputBuilder(port1Spec,
             m_settings.isIncludeSourceFilename(),
-            m_settings.isIncludeSheetName());
+            m_settings.isIncludeSheetName(),
+            false, // TODO M4: wire includeFormatCondition
+            false); // TODO M4: wire includeValidationType
 
         final ExcelFormExtractor extractor = new ExcelFormExtractor(m_settings);
 
@@ -215,29 +230,23 @@ public class ExcelFormReaderNodeModel extends NodeModel {
                 final Map<String, CellExtractionResult> results =
                     extractor.extract(entry.sheet, definition, entry.workbook);
 
-                // TODO M3: pass full CellExtractionResult map to builders for metadata columns
-                final Map<String, DataCell> values = new HashMap<>();
-                for (final Map.Entry<String, CellExtractionResult> e : results.entrySet()) {
-                    values.put(e.getKey(), e.getValue().value);
-                }
-
                 final String filePath = entry.filePath.toString();
                 final String sheetName = entry.sheetName;
 
                 if (wide) {
                     final DataRow row = wideBuilder.buildRow(
-                        filePath, sheetName, values, definition, rowIndex++);
+                        filePath, sheetName, results, definition, rowIndex++);
                     container.addRowToTable(row);
                 } else {
                     final List<DataRow> rows = longBuilder.buildRows(
-                        filePath, sheetName, values, definition, rowIndex);
+                        filePath, sheetName, results, definition, rowIndex);
                     rows.forEach(container::addRowToTable);
                     rowIndex += rows.size();
                 }
 
                 if (outputLabelPort) {
                     final List<DataRow> labelRows = labelBuilder.buildRows(
-                        filePath, sheetName, values, definition, labelRowIndex);
+                        filePath, sheetName, results, definition, labelRowIndex);
                     labelRows.forEach(labelContainer::addRowToTable);
                     labelRowIndex += labelRows.size();
                 }

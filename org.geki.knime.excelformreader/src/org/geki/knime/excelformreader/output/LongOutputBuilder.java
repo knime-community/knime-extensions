@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.geki.knime.excelformreader.domain.FieldMapping;
 import org.geki.knime.excelformreader.domain.FormDefinition;
+import org.geki.knime.excelformreader.excel.ExcelFormExtractor.CellExtractionResult;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
@@ -20,20 +21,26 @@ public class LongOutputBuilder {
     private final boolean includeSourceFilename;
     private final boolean includeSheetName;
     private final boolean includeLabelFields;
+    private final boolean includeFormatCondition;
+    private final boolean includeValidationType;
 
     public LongOutputBuilder(final DataTableSpec spec,
                               final boolean includeSourceFilename,
                               final boolean includeSheetName,
-                              final boolean includeLabelFields) {
+                              final boolean includeLabelFields,
+                              final boolean includeFormatCondition,
+                              final boolean includeValidationType) {
         this.spec = spec;
         this.includeSourceFilename = includeSourceFilename;
         this.includeSheetName = includeSheetName;
         this.includeLabelFields = includeLabelFields;
+        this.includeFormatCondition = includeFormatCondition;
+        this.includeValidationType = includeValidationType;
     }
 
     public List<DataRow> buildRows(final String sourceFile,
                                     final String sheetName,
-                                    final Map<String, DataCell> extractedValues,
+                                    final Map<String, CellExtractionResult> results,
                                     final FormDefinition definition,
                                     final long rowIndexBase) {
         final List<DataRow> rows = new ArrayList<>();
@@ -54,15 +61,28 @@ public class LongOutputBuilder {
                 cells[col++] = new StringCell(sheetName != null ? sheetName : "");
             }
 
+            final CellExtractionResult result = results != null
+                ? results.get(mapping.getName())
+                : null;
+
             cells[col++] = new StringCell(mapping.getName());
 
-            final DataCell raw = (extractedValues != null)
-                ? extractedValues.get(mapping.getName())
-                : null;
-            if (raw == null || raw.isMissing()) {
-                cells[col++] = DataType.getMissingCell();
-            } else {
-                cells[col++] = new StringCell(raw.toString());
+            final DataCell rawValue = result != null
+                ? result.value
+                : DataType.getMissingCell();
+            cells[col++] = rawValue.isMissing()
+                ? DataType.getMissingCell()
+                : new StringCell(rawValue.toString());
+
+            if (includeFormatCondition) {
+                cells[col++] = result != null
+                    ? result.formatConditionOperator
+                    : DataType.getMissingCell();
+            }
+            if (includeValidationType) {
+                cells[col++] = result != null
+                    ? result.validationType
+                    : DataType.getMissingCell();
             }
 
             while (col < cells.length) {

@@ -21,7 +21,9 @@ public class OutputSpecFactory {
     public static DataTableSpec createWideSpec(final FormDefinition definition,
                                                 final boolean includeSourceFilename,
                                                 final boolean includeSheetName,
-                                                final boolean includeLabelFields) {
+                                                final boolean includeLabelFields,
+                                                final boolean includeFormatCondition,
+                                                final boolean includeValidationType) {
         final List<DataColumnSpec> cols = new ArrayList<>();
 
         if (includeSourceFilename) {
@@ -39,13 +41,25 @@ public class OutputSpecFactory {
             cols.add(new DataColumnSpecCreator(
                 mapping.getName(),
                 dataTypeFromString(mapping.getDataType())).createSpec());
+            if (includeFormatCondition) {
+                cols.add(new DataColumnSpecCreator(
+                    mapping.getName() + " (Format Condition Operator)",
+                    StringCell.TYPE).createSpec());
+            }
+            if (includeValidationType) {
+                cols.add(new DataColumnSpecCreator(
+                    mapping.getName() + " (Validation Type)",
+                    StringCell.TYPE).createSpec());
+            }
         }
 
         return new DataTableSpec(cols.toArray(new DataColumnSpec[0]));
     }
 
     public static DataTableSpec createLongSpec(final boolean includeSourceFilename,
-                                                final boolean includeSheetName) {
+                                                final boolean includeSheetName,
+                                                final boolean includeFormatCondition,
+                                                final boolean includeValidationType) {
         final List<DataColumnSpec> cols = new ArrayList<>();
 
         if (includeSourceFilename) {
@@ -58,11 +72,22 @@ public class OutputSpecFactory {
         cols.add(new DataColumnSpecCreator("field_name", StringCell.TYPE).createSpec());
         cols.add(new DataColumnSpecCreator("value", StringCell.TYPE).createSpec());
 
+        if (includeFormatCondition) {
+            cols.add(new DataColumnSpecCreator(
+                "Format Condition Operator", StringCell.TYPE).createSpec());
+        }
+        if (includeValidationType) {
+            cols.add(new DataColumnSpecCreator(
+                "Validation Type", StringCell.TYPE).createSpec());
+        }
+
         return new DataTableSpec(cols.toArray(new DataColumnSpec[0]));
     }
 
     public static DataTableSpec createLabelSpec(final boolean includeSourceFilename,
-                                                 final boolean includeSheetName) {
+                                                 final boolean includeSheetName,
+                                                 final boolean includeFormatCondition,
+                                                 final boolean includeValidationType) {
         final List<DataColumnSpec> cols = new ArrayList<>();
 
         if (includeSourceFilename) {
@@ -75,6 +100,15 @@ public class OutputSpecFactory {
         cols.add(new DataColumnSpecCreator("Name", StringCell.TYPE).createSpec());
         cols.add(new DataColumnSpecCreator("Cell Range", StringCell.TYPE).createSpec());
         cols.add(new DataColumnSpecCreator("Cell Content", StringCell.TYPE).createSpec());
+
+        if (includeFormatCondition) {
+            cols.add(new DataColumnSpecCreator(
+                "Format Condition Operator", StringCell.TYPE).createSpec());
+        }
+        if (includeValidationType) {
+            cols.add(new DataColumnSpecCreator(
+                "Validation Type", StringCell.TYPE).createSpec());
+        }
 
         return new DataTableSpec(cols.toArray(new DataColumnSpec[0]));
     }
