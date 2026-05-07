@@ -61,7 +61,11 @@ Test fixture: Legacy_IT_System_Assessment_Test.xlsx
 
 Form definition: it_assessment_form_definition.csv
   - 40 field mappings
+  - 4 label fields: reference_date, assessor, system_type, system_name
+  - 36 data fields
   - Covers all cell address patterns used in the real form
+  - Data types covered: string, int, date
+  - Data types not covered (unit tests only): double, boolean
 
 ---
 

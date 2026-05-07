@@ -65,9 +65,23 @@
     </option>
 
     <option name="Range Cell Delimiter">
-      When a value_cell address specifies a range (e.g. B10:D15),
+      When a Cell Range address specifies a range (e.g. B10:D15),
       all cell values in the range are concatenated using this
       delimiter string.
+    </option>
+
+    <option name="Include label fields in port 0">
+      When enabled, label fields (Content Type = "label" in the
+      form definition table) are included in the main output table
+      alongside data fields, preserving the definition table order.
+      When disabled, only data fields appear in port 0.
+    </option>
+
+    <option name="Output label fields in port 1">
+      When enabled, label fields are extracted and output to port 1
+      as a separate table with fixed columns: Name, Cell Range, and
+      Cell Content (the extracted value), plus optional provenance
+      columns. When disabled, port 1 produces an empty table.
     </option>
 
     <option name="On Missing Cell">
@@ -87,11 +101,13 @@
   <ports>
     <inPort index="0" name="Form Definition">
       A table defining the form structure mapping field names to Excel
-      cell addresses. Required columns: field_name (String) — the output
-      column name; value_cell (String) — the Excel cell address (e.g. C4)
-      or range (e.g. B10:D15). Optional column: data_type (String) —
-      the expected value type, one of: string, int, double, date, boolean
-      (defaults to string if absent or blank).
+      cell addresses. Required columns: Name (String) — the output
+      column name; Cell Range (String) — the Excel cell address
+      (e.g. C4) or range (e.g. B10:D15). Optional columns:
+      Content Type (String) — the field role, either "data" (default)
+      or "label"; Data Type (String) — the expected value type, one
+      of: string, int, double, date, boolean (defaults to string if
+      absent or blank).
     </inPort>
     <outPort index="0" name="Extracted Data">
       The extracted form data as a flat KNIME table. When provenance
@@ -102,11 +118,11 @@
       fixed columns field_name (String) and value (String).
     </outPort>
     <outPort index="1" name="Label Fields">
-      One row per label field per (file, sheet) pair. Fixed columns:
-      Source File (String, if provenance enabled), Sheet Name (String,
-      if provenance enabled), Name (String), Cell Range (String),
-      Cell Content (String). Always produced; empty when no label fields
-      are defined in the form definition table.
+      Label field values extracted from the form. One row per label
+      field per (file, sheet) pair. Columns: Source File (optional),
+      Sheet Name (optional), Name, Cell Range, Cell Content. Only
+      populated when "Output label fields in port 1" is enabled in
+      the General tab. Empty table otherwise.
     </outPort>
   </ports>
 
