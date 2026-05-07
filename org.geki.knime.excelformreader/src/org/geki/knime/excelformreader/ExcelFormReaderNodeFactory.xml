@@ -10,119 +10,209 @@
   <name>Excel Reader (non-tabular)</name>
 
   <shortDescription>
-    Reads non-tabular, form-structured Excel worksheets into a
-    KNIME data table using a configurable field mapping definition.
+    Reads non-tabular, form-structured Excel worksheets
+    (.xlsx) into a KNIME data table using a configurable
+    field mapping definition.
   </shortDescription>
 
   <fullDescription>
     <intro>
-      Reads one or more .xlsx files containing form-structured
-      (non-tabular) worksheets and extracts field values into a
-      standard KNIME data table. The form structure is defined
-      by a connected input table that maps field names to Excel
-      cell addresses (e.g. C4, B10:D15). Each worksheet produces
-      one output row in wide mode, or one row per field in long mode.
-      Supports single file, all sheets in a workbook, folder, and
-      recursive folder reading modes.
+      Reads one or more .xlsx files containing
+      form-structured (non-tabular) worksheets and
+      extracts field values into a standard KNIME data
+      table. The form structure is defined by a connected
+      input table that maps field names to Excel cell
+      addresses (e.g. C4, B10:D15).
+
+      The form definition table requires two columns:
+      Name (the output column name) and Cell Range (the
+      Excel cell address or range). Two optional columns
+      are supported: Content Type ("data" or "label",
+      defaults to "data") and Data Type (string, int,
+      double, date, or boolean, defaults to string).
+
+      Each worksheet produces one output row in wide mode,
+      or one row per field in long mode. Label fields
+      (Content Type = "label") can optionally be included
+      in port 0 and/or output separately to port 1.
+
+      Supports single file, all sheets in a workbook,
+      folder, and recursive folder reading modes.
     </intro>
 
-    <option name="Reading Mode">
-      Select Single File to read from one .xlsx file, or Folder
-      to read all .xlsx files in a directory.
-    </option>
+    <tab name="General">
+      <option name="Input — Single File / Folder">
+        Select Single File to read from one .xlsx file.
+        Select Folder to read all matching .xlsx files
+        from a directory. Enables the corresponding
+        tab page and disables the other.
+      </option>
+      <option name="Output format">
+        Wide: produces one row per form instance
+        (file/sheet pair), with one column per field
+        defined in the mapping table.
+        Long: produces one row per field per form
+        instance, with fixed columns field_name and value.
+      </option>
+      <option name="Include source filename">
+        When enabled, adds a Source File column as the
+        first column in the output table, containing
+        the absolute path of the source .xlsx file.
+      </option>
+      <option name="Include sheet name">
+        When enabled, adds a Sheet Name column as the
+        second column in the output table (after Source
+        File if enabled), containing the worksheet name.
+      </option>
+      <option name="Include label fields in port 0">
+        When enabled, fields with Content Type = "label"
+        are included in the main output table (port 0)
+        alongside data fields, preserving the definition
+        table order. When disabled, only data fields
+        appear in port 0.
+      </option>
+      <option name="Output label fields in port 1">
+        When enabled, label fields are extracted and
+        output to port 1 as a separate table with fixed
+        columns: Name, Cell Range, and Cell Content (the
+        extracted value), plus optional provenance
+        columns. When disabled, port 1 produces an empty
+        table.
+      </option>
+      <option name="On missing cell">
+        Warn and insert missing value: if a cell address
+        cannot be resolved, a missing value is written
+        and a warning is logged. Fail: the node fails
+        immediately on the first unresolvable cell.
+      </option>
+      <option name="On unparseable value">
+        Warn and insert missing value: if a cell value
+        cannot be converted to the declared Data Type,
+        a missing value is written and a warning is
+        logged. Fail: the node fails immediately on the
+        first conversion error.
+      </option>
+    </tab>
 
-    <option name="File / Folder Path">
-      The path to the .xlsx file or the folder containing .xlsx files
-      to be read.
-    </option>
+    <tab name="File">
+      <option name="Read from">
+        The file system to read from. Currently only
+        Local File System is supported. Additional file
+        systems (mountpoint, relative to) may be added
+        in a future release.
+      </option>
+      <option name="File">
+        The path to the .xlsx file to read. Use the
+        Browse button to open a file chooser filtered
+        to .xlsx files.
+      </option>
+      <option name="Process single sheet">
+        Read exactly one worksheet from the selected
+        file using one of three selection methods:
+        First (the first non-hidden sheet with data),
+        By name (select from a dropdown of available
+        sheets), or By position (0-based index).
+      </option>
+      <option name="Include hidden worksheets (single)">
+        When enabled, hidden worksheets are included
+        when determining the first sheet or populating
+        the By name dropdown. When disabled, hidden
+        sheets are excluded.
+      </option>
+      <option name="Process many sheets">
+        Read all matching worksheets from the selected
+        file. Use All to include every sheet, Blacklist
+        to exclude named sheets, or Whitelist to include
+        only named sheets. Sheet names are
+        comma-separated and matched case-insensitively.
+      </option>
+      <option name="Include hidden worksheets (many)">
+        When enabled, hidden worksheets are included
+        when processing many sheets. When disabled,
+        hidden sheets are skipped.
+      </option>
+    </tab>
 
-    <option name="Include Subfolders">
-      When reading in Folder mode, also scan all subfolders
-      recursively for .xlsx files.
-    </option>
-
-    <option name="Default Sheet Name">
-      The name of the worksheet to read from each workbook. Leave
-      blank to read the first sheet.
-    </option>
-
-    <option name="Excluded Sheet Names">
-      Comma-separated list of worksheet names to skip when reading
-      all sheets from a workbook. Default: Config.
-    </option>
-
-    <option name="Output Format">
-      Wide: produces one row per form instance (file/sheet pair),
-      with one column per field defined in the mapping table.
-      Long: produces one row per field per form instance, with
-      fixed columns field_name and value.
-    </option>
-
-    <option name="Add Source File and Sheet Name Columns">
-      When enabled, adds source_file and sheet_name as the first
-      two columns in the output table, identifying the origin of
-      each row.
-    </option>
-
-    <option name="Range Cell Delimiter">
-      When a Cell Range address specifies a range (e.g. B10:D15),
-      all cell values in the range are concatenated using this
-      delimiter string.
-    </option>
-
-    <option name="Include label fields in port 0">
-      When enabled, label fields (Content Type = "label" in the
-      form definition table) are included in the main output table
-      alongside data fields, preserving the definition table order.
-      When disabled, only data fields appear in port 0.
-    </option>
-
-    <option name="Output label fields in port 1">
-      When enabled, label fields are extracted and output to port 1
-      as a separate table with fixed columns: Name, Cell Range, and
-      Cell Content (the extracted value), plus optional provenance
-      columns. When disabled, port 1 produces an empty table.
-    </option>
-
-    <option name="On Missing Cell">
-      Warn and set missing value: if a cell address cannot be
-      resolved, a missing value is written and a warning is logged.
-      Fail: the node fails immediately on the first unresolvable cell.
-    </option>
-
-    <option name="On Unparseable Value">
-      Warn and set missing value: if a cell value cannot be converted
-      to the declared data type, a missing value is written and a
-      warning is logged.
-      Fail: the node fails immediately on the first conversion error.
-    </option>
+    <tab name="Folder">
+      <option name="Read from">
+        The file system to read from. Currently only
+        Local File System is supported.
+      </option>
+      <option name="Folder">
+        The path to the folder containing .xlsx files
+        to read. Use the Browse button to open a
+        folder chooser.
+      </option>
+      <option name="Include subfolders">
+        When enabled, .xlsx files in all subfolders
+        are also included recursively.
+      </option>
+      <option name="Include hidden folders">
+        When enabled, hidden subfolders are included
+        during recursive scanning. Only available when
+        Include subfolders is checked.
+      </option>
+      <option name="Filter by file extension">
+        When enabled, only files matching the specified
+        extensions (comma-separated, default: xlsx) are
+        included. When disabled, all files in the folder
+        are considered.
+      </option>
+      <option name="Include hidden files">
+        When enabled, hidden files are included in the
+        folder scan.
+      </option>
+      <option name="Process single sheet">
+        Read exactly one worksheet from each file using
+        First, By name (text input), or By position
+        (0-based index).
+      </option>
+      <option name="Include hidden worksheets (single)">
+        When enabled, hidden worksheets are considered
+        when selecting the sheet per file.
+      </option>
+      <option name="Process many sheets">
+        Read all matching worksheets from each file.
+        Use All, Blacklist, or Whitelist with
+        comma-separated sheet names.
+      </option>
+      <option name="Include hidden worksheets (many)">
+        When enabled, hidden worksheets are included
+        when processing many sheets per file.
+      </option>
+    </tab>
   </fullDescription>
 
   <ports>
     <inPort index="0" name="Form Definition">
-      A table defining the form structure mapping field names to Excel
-      cell addresses. Required columns: Name (String) — the output
-      column name; Cell Range (String) — the Excel cell address
-      (e.g. C4) or range (e.g. B10:D15). Optional columns:
-      Content Type (String) — the field role, either "data" (default)
-      or "label"; Data Type (String) — the expected value type, one
-      of: string, int, double, date, boolean (defaults to string if
-      absent or blank).
+      A table defining the form structure mapping field
+      names to Excel cell addresses. Required columns:
+      Name (String) — the output column name; Cell Range
+      (String) — the Excel cell address (e.g. C4) or
+      range (e.g. B10:D15). Optional columns: Content
+      Type (String) — the field role, either "data"
+      (default) or "label"; Data Type (String) — the
+      expected value type, one of: string, int, double,
+      date, boolean (defaults to string if absent or
+      blank).
     </inPort>
     <outPort index="0" name="Extracted Data">
-      The extracted form data as a flat KNIME table. When provenance
-      columns are enabled, source_file (String) and sheet_name (String)
-      are always the first two columns, identifying the origin of each
-      row. In wide mode: one row per (file, sheet) pair, one column per
-      field. In long mode: one row per (file, sheet, field) triple, with
-      fixed columns field_name (String) and value (String).
+      The extracted form data as a flat KNIME table.
+      When provenance columns are enabled, Source File
+      and Sheet Name are the first columns. In wide
+      mode: one row per (file, sheet) pair, one column
+      per field. In long mode: one row per (file, sheet,
+      field) triple, with fixed columns field_name and
+      value. Label fields are included when the
+      corresponding toggle is enabled in the General tab.
     </outPort>
     <outPort index="1" name="Label Fields">
-      Label field values extracted from the form. One row per label
-      field per (file, sheet) pair. Columns: Source File (optional),
-      Sheet Name (optional), Name, Cell Range, Cell Content. Only
-      populated when "Output label fields in port 1" is enabled in
-      the General tab. Empty table otherwise.
+      Label field values extracted from the form. One
+      row per label field per (file, sheet) pair.
+      Fixed columns: Source File (optional), Sheet Name
+      (optional), Name, Cell Range, Cell Content.
+      Empty table when "Output label fields in port 1"
+      is disabled in the General tab.
     </outPort>
   </ports>
 
