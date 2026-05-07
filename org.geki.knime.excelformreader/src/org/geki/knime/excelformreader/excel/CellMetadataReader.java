@@ -3,12 +3,15 @@ package org.geki.knime.excelformreader.excel;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.ComparisonOperator;
 import org.apache.poi.ss.usermodel.ConditionType;
 import org.apache.poi.ss.usermodel.ConditionalFormatting;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
@@ -83,7 +86,8 @@ public class CellMetadataReader {
 
     /**
      * Returns the data validation type(s) applied to the cell(s) described
-     * by address. Multiple distinct values are joined with rangeDelimiter.
+     * by address. For LIST type, the list options are included in parentheses.
+     * Multiple distinct values are joined with rangeDelimiter.
      * Returns MissingCell when no matching validation rules exist.
      */
     public static DataCell readValidationType(
@@ -106,8 +110,7 @@ public class CellMetadataReader {
                     for (final CellRangeAddress region :
                             regions.getCellRangeAddresses()) {
                         if (region.isInRange(row, col)) {
-                            final String typeName = validationTypeName(
-                                dv.getValidationConstraint().getValidationType());
+                            final String typeName = validationTypeName(dv, sheet);
                             if (!types.contains(typeName)) {
                                 types.add(typeName);
                             }
@@ -152,17 +155,86 @@ public class CellMetadataReader {
         return "NO_COMPARISON";
     }
 
-    private static String validationTypeName(final int type) {
+    private static String validationTypeName(final DataValidation dv,
+                                              final Sheet sheet) {
+        final int type = dv.getValidationConstraint().getValidationType();
+        if (type == DataValidationConstraint.ValidationType.LIST) {
+            return "LIST (" + resolveListOptions(dv, sheet) + ")";
+        }
         switch (type) {
             case DataValidationConstraint.ValidationType.ANY:         return "ANY";
             case DataValidationConstraint.ValidationType.INTEGER:     return "INTEGER";
             case DataValidationConstraint.ValidationType.DECIMAL:     return "DECIMAL";
-            case DataValidationConstraint.ValidationType.LIST:        return "LIST";
             case DataValidationConstraint.ValidationType.DATE:        return "DATE";
             case DataValidationConstraint.ValidationType.TIME:        return "TIME";
             case DataValidationConstraint.ValidationType.TEXT_LENGTH: return "TEXT_LENGTH";
             case DataValidationConstraint.ValidationType.FORMULA:     return "FORMULA";
             default: return "UNKNOWN(" + type + ")";
+        }
+    }
+
+    private static String resolveListOptions(final DataValidation dv,
+                                              final Sheet sheet) {
+        final DataValidationConstraint constraint = dv.getValidationConstraint();
+        String formula = constraint.getFormula1();
+
+        if (formula == null || formula.trim().isEmpty()) {
+            return "";
+        }
+
+        formula = formula.trim();
+
+        // Inline list — Excel stores these as: "Option1,Option2" or with quoted entries
+        if (formula.startsWith("\"") && formula.endsWith("\"")) {
+            final String inner = formula.substring(1, formula.length() - 1);
+            final String[] options = inner.split(",");
+            final List<String> cleaned = new ArrayList<>();
+            for (final String opt : options) {
+                final String trimmed = opt.trim().replaceAll("^\"|\"$", "");
+                if (!trimmed.isEmpty()) {
+                    cleaned.add(trimmed);
+                }
+            }
+            return String.join(", ", cleaned);
+        }
+
+        // Range-based list — resolve cell values
+        try {
+            String rangeRef = formula;
+            if (rangeRef.contains("!")) {
+                rangeRef = rangeRef.substring(rangeRef.indexOf("!") + 1);
+            }
+            rangeRef = rangeRef.replace("$", "");
+
+            final CellRangeAddress range = CellRangeAddress.valueOf(rangeRef);
+            final DataFormatter formatter = new DataFormatter();
+            final List<String> values = new ArrayList<>();
+
+            for (int r = range.getFirstRow(); r <= range.getLastRow(); r++) {
+                final Row row = sheet.getRow(r);
+                if (row == null) {
+                    continue;
+                }
+                for (int c = range.getFirstColumn(); c <= range.getLastColumn(); c++) {
+                    final Cell cell = row.getCell(c);
+                    if (cell == null) {
+                        continue;
+                    }
+                    final String val = formatter.formatCellValue(cell);
+                    if (!val.trim().isEmpty()) {
+                        values.add(val.trim());
+                    }
+                }
+            }
+
+            if (values.isEmpty()) {
+                return formula;
+            }
+            return String.join(", ", values);
+
+        } catch (final Exception e) {
+            LOGGER.warn("Could not resolve list validation range: " + formula, e);
+            return formula;
         }
     }
 
