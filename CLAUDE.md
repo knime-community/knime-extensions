@@ -86,6 +86,35 @@ Always run the build and confirm success before committing any code changes.
 
 ---
 
+## Branch Strategy for KNIME Versions
+
+| Branch | p2 Repository | Active profile |
+|---|---|---|
+| `main` | nightly (default) | `knime-nightly` |
+| `releases/5.5` | `https://update.knime.com/analytics-platform/5.5` | `knime-5.5` |
+| `releases/5.8` | `https://update.knime.com/analytics-platform/5.8` | `knime-5.8` |
+| `releases/5.12` | `https://update.knime.com/analytics-platform/5.12` | `knime-5.12` |
+
+Maven profiles in `pom.xml` control the active p2 repository. Each release
+branch sets its profile as `activeByDefault`; `main` defaults to nightly.
+
+```bash
+mvn clean verify              # uses nightly profile (main branch default)
+mvn clean verify -P knime-5.5 # explicitly use 5.5 update site
+```
+
+KNIME Jenkins activates the correct profile per branch automatically via
+`-P knime-X.Y` in its build command.
+
+**New release branch checklist:**
+1. `git checkout -b releases/X.Y` from `main`
+2. Set `<activeByDefault>true</activeByDefault>` on the `knime-X.Y` profile
+   in `pom.xml` (remove it from `knime-nightly`)
+3. Commit, push branch
+4. Notify KNIME team to add a build job for the new branch
+
+---
+
 ## Git Conventions
 
 **Branching strategy:** GitHub Flow

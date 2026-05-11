@@ -29,13 +29,54 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <repositories>
-    <repository>
-      <id>knime-p2</id>
-      <layout>p2</layout>
-      <url>https://update.knime.com/analytics-platform/5.5</url>
-    </repository>
-  </repositories>
+  <profiles>
+    <profile>
+      <id>knime-nightly</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <repositories>
+        <repository>
+          <id>knime-p2</id>
+          <layout>p2</layout>
+          <url>https://update.knime.com/analytics-platform/nightly</url>
+        </repository>
+      </repositories>
+    </profile>
+
+    <profile>
+      <id>knime-5.5</id>
+      <repositories>
+        <repository>
+          <id>knime-p2</id>
+          <layout>p2</layout>
+          <url>https://update.knime.com/analytics-platform/5.5</url>
+        </repository>
+      </repositories>
+    </profile>
+
+    <profile>
+      <id>knime-5.8</id>
+      <repositories>
+        <repository>
+          <id>knime-p2</id>
+          <layout>p2</layout>
+          <url>https://update.knime.com/analytics-platform/5.8</url>
+        </repository>
+      </repositories>
+    </profile>
+
+    <profile>
+      <id>knime-5.12</id>
+      <repositories>
+        <repository>
+          <id>knime-p2</id>
+          <layout>p2</layout>
+          <url>https://update.knime.com/analytics-platform/5.12</url>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
 
   <build>
     <plugins>
