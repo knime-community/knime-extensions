@@ -34,6 +34,7 @@ bin/
 # Tycho / Maven
 target/
 */target/
+.mvn/
 
 # KNIME
 *.knwf

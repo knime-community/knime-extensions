@@ -4,7 +4,7 @@ Bundle-Name: Excel Reader (non-tabular)
 Bundle-SymbolicName: org.geki.knime.excelformreader;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: DataCraft Labs
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Require-Bundle: org.knime.core;bundle-version="[5.5.0,6.0.0)",
  org.knime.base;bundle-version="[5.5.0,6.0.0)",
  org.apache.poi;bundle-version="[5.0.0,6.0.0)"
