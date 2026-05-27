@@ -5,8 +5,9 @@ Bundle-SymbolicName: org.geki.knime.excelformreader;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: DataCraft Labs
 Bundle-RequiredExecutionEnvironment: JavaSE-21
-Require-Bundle: org.knime.core;bundle-version="[5.5.0,6.0.0)",
- org.knime.base;bundle-version="[5.5.0,6.0.0)",
+Require-Bundle: org.knime.core;bundle-version="[5.5.0,7.0.0)",
+ org.knime.base;bundle-version="[5.5.0,7.0.0)",
+ org.knime.core.ui;bundle-version="[5.5.0,7.0.0)",
  org.apache.poi;bundle-version="[5.0.0,6.0.0)"
 Export-Package: org.geki.knime.excelformreader,
  org.geki.knime.excelformreader.domain;x-friends:="org.geki.knime.excelformreader.tests",
