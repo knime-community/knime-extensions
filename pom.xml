@@ -72,7 +72,7 @@
         <repository>
           <id>knime-p2</id>
           <layout>p2</layout>
-          <url>https://update.knime.com/analytics-platform/5.12</url>
+          <url>https://update.knime.com/analytics-platform/lts/5.12</url>
         </repository>
       </repositories>
     </profile>
