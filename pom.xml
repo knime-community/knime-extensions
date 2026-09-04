@@ -53,7 +53,7 @@
         <repository>
           <id>knime-p2</id>
           <layout>p2</layout>
-          <url>https://update.knime.com/analytics-platform/nightly</url>
+          <url>https://jenkins.devops.knime.com/p2/knime/analytics-platform/stable-nightly-update-site</url>
         </repository>
       </repositories>
     </profile>
