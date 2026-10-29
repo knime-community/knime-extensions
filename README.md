@@ -88,8 +88,9 @@ Folder tab:
 ### Prerequisites
 
 - Debian 12 or compatible Linux
-- JDK 17 (openjdk-17-jdk) for building
-- JDK 21 via SDKMAN for Eclipse launch configuration only
+- JDK 21 (e.g. via SDKMAN) — Maven runs on it, the plugin
+  declares a JavaSE-21 execution environment, and on this
+  branch sources compile at 21 as well
 - Maven 3.9+
 - Eclipse for RCP and RAP Developers 2024-03 or later
 - KNIME SDK Setup from https://github.com/knime/knime-sdk-setup
@@ -99,7 +100,21 @@ Folder tab:
 
 Run from the repository root:
 
-  mvn clean verify
+  mvn -U clean verify
+
+Always pass `-U`. Tycho's default cache-first update mode
+never re-fetches metadata it already holds, so without it a
+build can silently resolve stale target-platform metadata and
+then fail on artifacts the server has since removed.
+
+On this branch no -P is needed: the knime-5.12 profile is
+active by default and resolves against
+https://update.knime.com/analytics-platform/lts/5.12
+
+To build against a different KNIME release:
+
+  mvn -U clean verify -P knime-5.5
+  mvn -U clean verify -P knime-5.8
 
 Build output (update site) is produced at:
 
@@ -127,9 +142,17 @@ Build output (update site) is produced at:
 
 ### Branching strategy
 
-- main: always releasable
-- develop: integration branch
-- feature/name: one branch per feature
+- main: always releasable; development happens here, built
+  against the KNIME nightly p2 repository
+- releases/X.Y: one long-lived branch per supported KNIME
+  version (currently 5.5, 5.8, 5.12), each pinned to that
+  version's update site via a Maven profile
+- feature/name: one branch per feature, branched from main
+
+You are on releases/5.12, pinned to the KNIME 5.12 LTS
+update site.
+
+There is no develop branch.
 
 ---
 
